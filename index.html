@@ -5,56 +5,117 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador da Máquina de Turing</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <header>
+        <h2>Simulador da Máquina de Turing</h2>
+    </header>
+
     <main>
         <div class="saida">
             <div class="fita">
-                AQUI SERÁ A FITA
+                <div class="cedula">1</div>
+                <div class="cedula">2</div>
+                <div class="cedula">3</div>
+                <div class="cedula">4</div>
+                <div class="cedula">5</div>
+                <div class="cedula">6</div>
+                <div class="cedula">7</div>
+                <div class="cedula">8</div>
+                <div class="cedula">9</div>
+                <div class="cedula">10</div>
+                <div class="cedula">11</div>
+                <div class="cedula">12</div>
+                <div class="cedula">13</div>
+                <div class="cedula">14</div>
+                <div class="cedula">15</div>
+                <div class="cedula">16</div>
+                <div class="cedula">17</div>
+                <div class="cedula">18</div>
+                <div class="cedula">19</div>
+                <div class="cedula">20</div>
+                <div class="cedula">21</div>
+                <div class="cedula">22</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
+                <div class="cedula">23</div>
             </div>
             <div id="cabecote">
                 &uArr;
+            </div>
+
+            <div class="entrada-dados">
+                <input type="text" id="dados"  placeholder="Dados de Entrada"/>
             </div>
         </div>
 
         <div class="entrada">
             <div class="nontuplas">
-                <div>
+                <div class="inputs">
                     <label for="estados" title="Conjuntos de Estados">Q = </label> 
                     <input type="text" id="estados"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="alfaberto" title="Alfaberto">&Sigma; = </label> 
                     <input type="text" id="alfaberto-fita"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="estado-inicial" title="Estado Inicial">S<sub>0</sub> = </label> 
-                    <input type="text" id="alfaberto"/>
+                    <input type="text" id="alfaberto" size="2" maxlength="2"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="estado-final" title="Conjuntos de Estados Finais">F = </label> 
                     <input type="text" id="estado-final"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="estado-nao-final" title="Conjuntos de Estados Não Finais">R = </label> 
                     <input type="text" id="estado-nao-final"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label> 
                     <input type="text" id="alfaberto-fita"/>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="delimitador" title="Delimitador">&#9658; = </label> 
                     <span>&#9658;</span>
                 </div>
 
-                <div>
+                <div class="inputs">
                     <label for="branco-fita" title="Branco de Fitas">&#x411; = </label> 
                     <span>&#x411;</span>
                 </div>
@@ -76,5 +137,7 @@
             </div>
         </div>
     </main>
+
+    <script src="js/script.js"></script>
 </body>
 </html>

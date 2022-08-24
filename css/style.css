@@ -15,6 +15,12 @@
     --fonte-principal: 'Space Mono', monospace;
 }
 
+.container {
+    max-width: 24160px;
+    margin: auto;
+    padding: 0px 20px;
+}
+
 header {
     padding: 20px;
 }
@@ -33,24 +39,99 @@ main {
 }
 
 .saida {
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
 
-.saida > .fita {
-    display: block;
-    background-color: yellow;
-    max-width: 100wh;
-    overflow-y: hidden;
-    overflow-x: scroll;
+.estado-atual-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: fit-content;
+    margin-bottom: 20px;
 }
 
-.saida > .fita > .cedula {
-    width: 50px;
-    height: 50px;
-    border: 1px solid black;
-    display: inline-flex;
+.estado-atual-container > .estado {
+    width: 150px;
+    height: 150px;
+    border: 3px solid var(--color1);
+    border-radius: 10px;
+    display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 4em;
+}
+
+.fitas {
+    display: flex;
+    overflow-x: scroll;
+    width: 100%;
+    justify-content: flex-start;
+    border: 1px solid var(--color1);
+}
+
+/* width */
+.fitas::-webkit-scrollbar {
+    height: 10px;
+    display: none;
+}
+
+/* Track */
+.fitas::-webkit-scrollbar-track {
+    background: var(--color3);
+}
+
+/* Handle */
+.fitas::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: var(--color4);
+  }
+  
+  /* Handle on hover */
+  .fitas::-webkit-scrollbar-thumb:hover {
+    background: var(--color5);
+  }
+
+.fitas > .cedula {
+    display: inline-flex;
+    overflow: visible;
+    min-width: 50px;
+    height: 50px;
+    border: 1px solid var(--color1);
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: var(--color4);
+}
+
+#cabecote {
+    display: flex;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: flex-start;
+    font-size: 3em;
+    margin-top: -25px;
+    color: var(--color1);
+    font-weight: bolder;
+}
+
+.entrada-dados {
+    margin-top: 20px;
+    border-top: 1px solid var(--color1);
+    border-bottom: 1px solid var(--color1);
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.entrada-dados > .controls {
+    display: flex;
+    justify-content: space-between;
+}
+
+.entrada-dados input {
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.466);
 }
 
 .nontuplas > .inputs {

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador da Máquina de Turing</title>
+</head>
+<body>
+    <main>
+        <div class="saida">
+            <div class="fita">
+                AQUI SERÁ A FITA
+            </div>
+            <div id="cabecote">
+                &uArr;
+            </div>
+        </div>
+
+        <div class="entrada">
+            <div class="nontuplas">
+                <div>
+                    <label for="estados" title="Conjuntos de Estados">Q = </label> 
+                    <input type="text" id="estados"/>
+                </div>
+
+                <div>
+                    <label for="alfaberto" title="Alfaberto">&Sigma; = </label> 
+                    <input type="text" id="alfaberto-fita"/>
+                </div>
+
+                <div>
+                    <label for="estado-inicial" title="Estado Inicial">S<sub>0</sub> = </label> 
+                    <input type="text" id="alfaberto"/>
+                </div>
+
+                <div>
+                    <label for="estado-final" title="Conjuntos de Estados Finais">F = </label> 
+                    <input type="text" id="estado-final"/>
+                </div>
+
+                <div>
+                    <label for="estado-nao-final" title="Conjuntos de Estados Não Finais">R = </label> 
+                    <input type="text" id="estado-nao-final"/>
+                </div>
+
+                <div>
+                    <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label> 
+                    <input type="text" id="alfaberto-fita"/>
+                </div>
+
+                <div>
+                    <label for="delimitador" title="Delimitador">&#9658; = </label> 
+                    <span>&#9658;</span>
+                </div>
+
+                <div>
+                    <label for="branco-fita" title="Branco de Fitas">&#x411; = </label> 
+                    <span>&#x411;</span>
+                </div>
+                <!-- Q = q0, ..., q7
+                Σ = 0,1,2
+                S0 = q0
+                F = q7
+                ΣF = 0,1,2,X,Y,>,b
+                R = q0, ..., q6
+                > = >
+                b = b 
+                (delta) -> Tabela de Transição
+            -->
+                
+            </div>
+
+            <div class="tabela-comando">
+
+            </div>
+        </div>
+    </main>
+</body>
+</html>

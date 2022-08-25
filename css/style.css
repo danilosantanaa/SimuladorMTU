@@ -151,6 +151,10 @@ main {
     outline: none;
 }
 
+.entrada-dados input[type="range"] {
+    padding: 0;
+}
+
 .entrada-dados button {
     padding: 0px 10px;
     cursor: pointer;

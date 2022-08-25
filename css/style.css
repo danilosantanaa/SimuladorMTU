@@ -9,6 +9,7 @@
     --color1: #8C530D;
     --color2: #D99D55;
     --color3: #D9B282;
+    --color3a: #dbd7d2;
     --color4: #732002;
     --color5: #260101;
 
@@ -38,6 +39,7 @@ main {
     padding: 10px;
 }
 
+/* SAÍDA */
 .saida {
     margin-bottom: 30px;
 }
@@ -53,17 +55,21 @@ main {
 .estado-atual-container > .estado {
     width: 150px;
     height: 150px;
-    border: 3px solid var(--color1);
+    border: 3px solid var(--color3);
     border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 4em;
+    cursor: default;
+    user-select: none;
+    background-color: var(--color1);
+    color: white;
 }
 
 .fitas {
     display: flex;
-    overflow-x: scroll;
+    overflow-x: auto;
     width: 100%;
     justify-content: flex-start;
     border: 1px solid var(--color1);
@@ -84,10 +90,10 @@ main {
 .fitas::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: var(--color4);
-  }
-  
-  /* Handle on hover */
-  .fitas::-webkit-scrollbar-thumb:hover {
+}
+
+/* Handle on hover */
+.fitas::-webkit-scrollbar-thumb:hover {
     background: var(--color5);
   }
 
@@ -100,7 +106,8 @@ main {
     justify-content: center;
     align-items: center;
     font-size: 2em;
-    color: var(--color4);
+    color: white;
+    background-color: #D99D55;
 }
 
 #cabecote {
@@ -122,6 +129,7 @@ main {
     padding: 10px;
     display: flex;
     justify-content: flex-end;
+    background-color: var(--color3a);
 }
 
 .entrada-dados > .controls {
@@ -129,11 +137,97 @@ main {
     justify-content: space-between;
 }
 
+.entrada-dados > .controls > *{
+    margin-left: 5px;
+}
+
 .entrada-dados input {
     padding: 10px;
     border: 1px solid rgba(0, 0, 0, 0.466);
+    outline: none;
+}
+
+.entrada-dados button {
+    padding: 0px 10px;
+    cursor: pointer;
+    transition: background ease-in-out .6s;
+    border: 1px solid rgba(0, 0, 0, 0.466);
+}
+
+.entrada-dados .btn {
+    color: white;
+    background-color: #cecece;
+}
+
+.entrada-dados .btn.executar {
+    background-color: green;
+    border-color: rgb(1, 66, 1);
+}
+
+.entrada-dados .btn.executar:hover {
+    background-color: rgb(1, 66, 1);
+}
+
+.entrada-dados .btn.parar {
+    background-color: red;
+    border-color: rgb(185, 2, 2);
+}
+
+.entrada-dados .btn.parar:hover {
+    background-color: rgb(185, 2, 2);
+}
+
+.entrada-dados input[type="range"] {
+    background-color: green;
 }
 
 .nontuplas > .inputs {
     margin-bottom: 10px;
+}
+
+/* ESTRADA */
+
+.entrada > .nontuplas {
+    font-size: 1.3em;
+}
+
+.entrada > .nontuplas > .inputs {
+    display: block;
+    margin-bottom: 25px;
+}
+
+.entrada > .nontuplas > .inputs > label {
+    color: var(--color4);
+    font-weight: bolder;
+}
+
+.entrada > .nontuplas > .inputs > span[contenteditable="true"] {
+    outline: none;
+    border-radius: 10px;
+    width: fit-content;
+    padding: 10px 0px;
+    cursor: text;
+    color: var(--color1);
+}
+
+.entrada > .nontuplas > .inputs > .const {
+    color: var(--color1);
+    cursor: help;
+}
+
+.entrada > .nontuplas > .inputs > span[contenteditable="true"]:hover,
+.entrada > .nontuplas > .inputs > span[contenteditable="true"]:focus {
+    border: dashed 1px rgba(0, 0, 0, 0.466);
+}
+
+.inputs > span[contenteditable="true"]::after {
+    content: "}";
+}
+
+.inputs > span#alfaberto-fita::after {
+    content: ", \25BA, \411}";
+}
+
+.inputs > span[contenteditable="true"]::before {
+    content: "{";
 }

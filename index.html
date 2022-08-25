@@ -17,7 +17,7 @@
             <div class="saida">
                 
                 <div class="estado-atual-container">
-                    <div class="estado">
+                    <div class="estado" title="Estado Atual">
                         q1
                     </div>
                 </div>
@@ -87,8 +87,8 @@
                 <div class="entrada-dados">
                     <div class="controls">
                         <input type="text" id="dados"  placeholder="Dados de Entrada"/>
-                        <button>Executar</button>
-                        <button>Parar</button>
+                        <button class="btn executar" title="Executar">Executar</button>
+                        <button class="btn parar" title="Parar">Parar</button>
                         <input type="range" min="1" max="10" value="5" title="Velocidade"/>
                     </div>
                 </div>
@@ -98,54 +98,44 @@
                 <div class="nontuplas">
                     <div class="inputs">
                         <label for="estados" title="Conjuntos de Estados">Q = </label> 
-                        <input type="text" id="estados"/>
+                        <span  id="estados" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="alfaberto" title="Alfaberto">&Sigma; = </label> 
-                        <input type="text" id="alfaberto-fita"/>
+                        <span id="alfaberto" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="estado-inicial" title="Estado Inicial">S<sub>0</sub> = </label> 
-                        <input type="text" id="alfaberto" size="2" maxlength="2"/>
+                        <span id="alfaberto" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="estado-final" title="Conjuntos de Estados Finais">F = </label> 
-                        <input type="text" id="estado-final"/>
+                        <span id="estado-final" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="estado-nao-final" title="Conjuntos de Estados Não Finais">R = </label> 
-                        <input type="text" id="estado-nao-final"/>
+                        <span id="estado-nao-final" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label> 
-                        <input type="text" id="alfaberto-fita"/>
+                        <span id="alfaberto-fita" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="delimitador" title="Delimitador">&#9658; = </label> 
-                        <span>&#9658;</span>
+                        <span class="const" title="Constante">&#9658;</span>
                     </div>
 
                     <div class="inputs">
                         <label for="branco-fita" title="Branco de Fitas">&#x411; = </label> 
-                        <span>&#x411;</span>
+                        <span class="const" title="Constante">&#x411;</span>
                     </div>
-                    <!-- Q = q0, ..., q7
-                    Σ = 0,1,2
-                    S0 = q0
-                    F = q7
-                    ΣF = 0,1,2,X,Y,>,b
-                    R = q0, ..., q6
-                    > = >
-                    b = b 
-                    (delta) -> Tabela de Transição
-                -->
-                    
+            
                 </div>
 
                 <div class="tabela-comando">

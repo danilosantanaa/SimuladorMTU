@@ -141,6 +141,10 @@ main {
     margin-left: 5px;
 }
 
+.entrada-dados input, .entrada-dados button {
+    border-radius: 5px;
+}
+
 .entrada-dados input {
     padding: 10px;
     border: 1px solid rgba(0, 0, 0, 0.466);

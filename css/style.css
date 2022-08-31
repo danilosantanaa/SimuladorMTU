@@ -232,10 +232,6 @@ main {
     content: "}";
 }
 
-.inputs > span#alfaberto-fita::after {
-    content: ", \25BA, \411}";
-}
-
 .inputs > span[contenteditable="true"]::before {
     content: "{";
 }

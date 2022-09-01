@@ -7,6 +7,7 @@
     <title>Simulador da Máquina de Turing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/intellisense.css">
 </head>
 <body>
     <div class="container">
@@ -82,7 +83,7 @@
                 </div>
             
                 <div id="cabecote">
-                    &uarr;
+                    <i class="fa-sharp fa-solid fa-arrow-up"></i>
                 </div>
 
                 <div class="entrada-dados">
@@ -95,6 +96,7 @@
                 </div>
             </div>
 
+          
             <div class="entrada">
                 <div class="nontuplas">
                     <div class="inputs">
@@ -140,9 +142,59 @@
                 </div>
 
                 <div class="tabela-comando">
+                    <div class="tb-content">
+                        <table class="codigo">
 
+                            <thead>
+                                <tr>
+                                    <th class="cmd-linha cl-codigo"><!-- Número da linha --></th>
+                                    <th class="th-info">
+                                        <div class="info">
+                                            <div class="estado">Q</div> \
+                                            <div class="sigma">&Sigma;</div>
+                                        </div>
+                                    </th>
+                                    <th contenteditable="true">0</th>
+                                    <th contenteditable="true">1</th>
+                                    <th contenteditable="true">&#9658;</th>
+                                    <th contenteditable="true">&#x411;</th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody>
+                                <tr>
+                                    <td class="cmd-linha">1</td>
+                                    <td contenteditable="true">q0</td>
+                                    <td contenteditable="true"></td>
+                                    <td contenteditable="true"><span class="cmd-estado">q0</span> <span class="cmd-transicao">></span> <span class="cmd-direcao ">R</span></td>
+                                    <td contenteditable="true"><span class="cmd-estado">q1</span> <span class="cmd-transicao">></span> <span class="cmd-direcao ">R</span></td>
+                                    <td contenteditable="true"></td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cmd-linha">2</td>
+                                    <td contenteditable="true">q1</td>
+                                    <td contenteditable="true"></td>
+                                    <td contenteditable="true"></td>
+                                    <td contenteditable="true"></td>
+                                    <td contenteditable="true"><span class="cmd-estado">q2</span> <span class="cmd-transicao">b</span> <span class="cmd-direcao ">P</span></td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="cmd-linha">3</td>
+                                    <td contenteditable="true">q2</td>
+                                    <td contenteditable="true"></td>
+                                    <td contenteditable="true"><span class="cmd-estado">q0</span> <span class="cmd-transicao">></span> <span class="cmd-direcao ">R</span></td>
+                                    <td contenteditable="true"><span class="cmd-estado">q1</span> <span class="cmd-transicao">></span> <span class="cmd-direcao ">R</span></td>
+                                    <td contenteditable="true"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+                
+            
         </main>
     </div>
     <script src="js/script.js"></script>

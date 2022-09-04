@@ -299,7 +299,7 @@ table.codigo tbody {
     font-family: monospace;
 }
 
-table.codigo tr:hover, table.codigo tr:focus-within {
+table.codigo tr:focus-within {
     background-color: #cecece;
     font-weight: bolder;
 }

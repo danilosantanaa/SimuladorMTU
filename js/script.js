@@ -121,6 +121,10 @@ class AnalisadorSintaticoNonTuplas {
         return lista_elementos.length > 2 && this.isConjuntos(this.el_alfaberto_fita.innerText) && this.branco_fita == lista_elementos[ultimo_elemento] && this.delimitador == lista_elementos[penultimo_elemento]
     }
 
+    isAlfabertoFitaPreenchida() {
+        return this.el_alfaberto_fita.innerText.trim() != ""
+    }
+
     get delimitador() {
         return SimbolosEstaticos.delimitador.label
     }
@@ -151,6 +155,18 @@ class AnalisadorSintaticoNonTuplas {
         return this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.test(texto)
     }
 
+    getNontupla() {
+        return new Nontupla(
+            this.conjunto_estado,
+            this.alfaberto,
+            this.estado_inicial,
+            this.estado_final,
+            this.estado_nao_final,
+            this.alfaberto_fita,
+            this.delimitador,
+            this.branco_fita
+        )
+    }
 }
 
 class Nontupla {
@@ -263,24 +279,45 @@ class GerarTabelaTransicao {
     }
 
     adicionarAlfabetoFita(tr) {
-        this.nontuplaObj.branco_fita.forEach(fita => {
+        this.nontuplaObj.alfaberto_fita.forEach(fita => {
             let th = criarElemento("th", fita)
             adicionarElemento(tr, th)
         })
     }
 
     totAlfabetoFita() {
-        return this.nontuplaObj.branco_fita.length
+        return this.nontuplaObj.alfaberto_fita.length
     }
 }
 
 
 /** DECLARAÇÃO DE VARIAVEIS */
 
+// ELEMENTOS DOM DA NONTUPLAS
+const el_estados = document.querySelector("#estados")
+const el_alfaberto = document.querySelector("#alfaberto")
+const el_estado_inicial = document.querySelector("#estado-inicial")
+const el_estado_final = document.querySelector("#estado-final")
+const el_estado_nao_final = document.querySelector("#estado-nao-final")
+const el_alfaberto_fita = document.querySelector("#alfaberto-fita")
+const el_delimitador = document.querySelector("#delimitador")
+const el_branco_fita = document.querySelector("#branco-fita")
+
 // TABELA DE TRANSIÇÕES
-const thead_codigo = document.querySelector("#tb-cabecalho")
-const tbody_codigo = document.querySelector("#tb-corpo")
+const el_thead_codigo = document.querySelector("#tb-cabecalho")
+const el_tbody_codigo = document.querySelector("#tb-corpo")
+
+// OBJETOS
+const analisadorSintaticoNontupla = new AnalisadorSintaticoNonTuplas(el_estados, el_alfaberto, el_estado_inicial, el_estado_final, el_estado_nao_final, el_alfaberto_fita, el_delimitador, el_branco_fita)
 
 /** CHAMADA A EVENTOS */
+el_alfaberto_fita.addEventListener("focusout", () => {
 
-/** CHAMADA A FUNÇÕES */
+    if(analisadorSintaticoNontupla.isAlfabertoFitaPreenchida()) {
+        if(analisadorSintaticoNontupla.isAlfabertoFita()) {
+            const gerarTabela = new GerarTabelaTransicao(analisadorSintaticoNontupla.getNontupla(), el_thead_codigo, el_tbody_codigo)
+            gerarTabela.gerarTabela()
+        }
+    }
+})
+

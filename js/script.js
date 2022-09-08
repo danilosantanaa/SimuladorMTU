@@ -35,6 +35,18 @@ SimbolosEstaticos = {
 }
 
 
+class ExpressaoRegular {
+    constructor() {
+        this.Validadores = {
+            VALIDADOR_CONJUNTOS: /^(\s*[a-zA-Z0-9\>]+\s*)(\,\s*[a-zA-Z0-9\>]+\s*)*$/g
+        }
+
+        this.ExtrairValores = {
+            EXTRAIR_ELEMENTO_CONJUNTO: /[a-zA-Z0-9\>]+/g
+        }
+    }
+}
+
 /** EXPRESSÕES REGULARES VALIDADORES */
 const VALIDADOR_CONJUNTOS = /^(\s*[a-zA-Z0-9\>]+\s*)(\,\s*[a-zA-Z0-9\>]+\s*)*$/g
 
@@ -51,6 +63,7 @@ class AnalisadorSintaticoNonTuplas {
         this.el_alfaberto_fita = el_alfaberto_fita
         this.el_delimitador = el_delimitador
         this.el_branco_fita = el_branco_fita
+        this.ExpressaoRegular = new ExpressaoRegular()
     }
 
     get conjunto_estado() {
@@ -97,15 +110,15 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     get alfaberto_fita() {
-        return this.isAlfabertoFita() ? this.extrairConjuntos(this.alfaberto_fita.innerText) : []
+        return this.isAlfabertoFita() ? this.extrairConjuntos(this.el_alfaberto_fita) : []
     }
 
     isAlfabertoFita() {
-        const alfaberto_fita = this.extrairConjuntos(this.el_alfaberto_fita)
-        let ultimo_elemento =  alfaberto_fita.length - 1
-        let penultimo_elemento = alfaberto_fita.length - 2
+        const lista_elementos = this.extrairConjuntos(this.el_alfaberto_fita)
+        let ultimo_elemento =  lista_elementos.length - 1
+        let penultimo_elemento = lista_elementos.length - 2
 
-        return alfaberto_fita.length > 2 && VALIDADOR_CONJUNTOS.test(this.el_alfaberto_fita.innerText) && this.branco_fita == alfaberto_fita[ultimo_elemento] && this.delimitador == alfaberto_fita[penultimo_elemento]
+        return lista_elementos.length > 2 && this.isConjuntos(this.el_alfaberto_fita.innerText) && this.branco_fita == lista_elementos[ultimo_elemento] && this.delimitador == lista_elementos[penultimo_elemento]
     }
 
     get delimitador() {
@@ -122,7 +135,20 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     extrairConjuntos(el) {
-        return el != undefined ? [... new Set(el.innerText.match(RX_ELEMENTOS_VALIDOS))] : []
+        
+       if(el != undefined && el != null && el.innerText) {
+            const texto = el.innerText.trim()
+            const elementos_lista = texto.match(this.ExpressaoRegular.ExtrairValores.EXTRAIR_ELEMENTO_CONJUNTO)
+            const conjuntos = new Set(elementos_lista)
+            return [... conjuntos]
+       }
+
+        return []
+    }
+
+    isConjuntos(texto) {
+       this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.lastIndex = 0
+        return this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.test(texto)
     }
 
 }
@@ -249,6 +275,12 @@ class GerarTabelaTransicao {
 }
 
 
-/** CHAMANDAS DE FUNÇÕES */
+/** DECLARAÇÃO DE VARIAVEIS */
+
+// TABELA DE TRANSIÇÕES
 const thead_codigo = document.querySelector("#tb-cabecalho")
 const tbody_codigo = document.querySelector("#tb-corpo")
+
+/** CHAMADA A EVENTOS */
+
+/** CHAMADA A FUNÇÕES */

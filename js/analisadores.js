@@ -1,28 +1,10 @@
-function criarElemento(elemento, valor = null, propriedades = {}) {
-    const tagElemento = document.createElement(elemento)
-
-    // Colocando o valor na tag
-    if(valor != null && valor != undefined && tagElemento.innerHTML != undefined) {
-        tagElemento.innerHTML = valor
-    }
-
-    // Colocando a propriedade
-    for(let propriedade in propriedades) {
-        tagElemento.setAttribute(propriedade, propriedades[propriedade])
-    }
-
-    return tagElemento
-}
-
-function adicionarElemento(elementoPai, elementoFilho) {
-    elementoPai.append(elementoFilho)
-}
+import { criarElemento, adicionarElemento } from "./ManipularDOM.js"
 
 /**
  *
  * Tabela de simbolos
  */
-SimbolosEstaticos = {
+const SimbolosEstaticos = {
     delimitador: {
         display: "&#9658;",
         label: ">"
@@ -33,7 +15,6 @@ SimbolosEstaticos = {
         label: "b"
     }
 }
-
 
 class ExpressaoRegular {
     constructor() {

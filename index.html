@@ -17,71 +17,15 @@
 
         <main>
             <div class="saida">
-                
+
                 <div class="estado-atual-container">
                     <div class="estado" title="Estado Atual">
                         --
                     </div>
                 </div>
 
-                <div class="fitas">
-                    <div class="cedula">&#9658;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                    <div class="cedula">&#x411;</div>
-                </div>
-            
+                <div class="fitas"></div>
+
                 <div id="cabecote">
                     <i class="fa-sharp fa-solid fa-arrow-up"></i>
                 </div>
@@ -96,49 +40,49 @@
                 </div>
             </div>
 
-          
+
             <div class="entrada">
                 <div class="nontuplas">
                     <div class="inputs">
-                        <label for="estados" title="Conjuntos de Estados">Q = </label> 
+                        <label for="estados" title="Conjuntos de Estados">Q = </label>
                         <span  id="estados" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="alfaberto" title="Alfaberto">&Sigma; = </label> 
+                        <label for="alfaberto" title="Alfaberto">&Sigma; = </label>
                         <span id="alfaberto" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="estado-inicial" title="Estado Inicial">S<sub>0</sub> = </label> 
+                        <label for="estado-inicial" title="Estado Inicial">S<sub>0</sub> = </label>
                         <span id="estado-inicial" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="estado-final" title="Conjuntos de Estados Finais">F = </label> 
+                        <label for="estado-final" title="Conjuntos de Estados Finais">F = </label>
                         <span id="estado-final" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="estado-nao-final" title="Conjuntos de Estados Não Finais">R = </label> 
+                        <label for="estado-nao-final" title="Conjuntos de Estados Não Finais">R = </label>
                         <span id="estado-nao-final" contenteditable="true">&nbsp;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label> 
+                        <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label>
                         <span id="alfaberto-fita" contenteditable="true">, >, b</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="delimitador" title="Delimitador">&#9658; = </label> 
+                        <label for="delimitador" title="Delimitador">&#9658; = </label>
                         <span title="Constante" id="delimitador">&#9658;</span>
                     </div>
 
                     <div class="inputs">
-                        <label for="branco-fita" title="Branco de Fitas">&#x411; = </label> 
+                        <label for="branco-fita" title="Branco de Fitas">&#x411; = </label>
                         <span title="Constante" id="branco-fita">&#x411;</span>
                     </div>
-            
+
                 </div>
 
                 <div class="tabela-comando">
@@ -150,10 +94,9 @@
                     </div>
                 </div>
             </div>
-                
-            
         </main>
     </div>
-    <script src="js/analisadores.js"></script>
+    <script type="module" src="js/geral.js"></script>
+    <script type="module" src="js/analisadores.js"></script>
 </body>
 </html>

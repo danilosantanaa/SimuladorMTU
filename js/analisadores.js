@@ -71,7 +71,7 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     isConjuntosEstado() {
-        return this.el_conjunto_estado != undefined && VALIDADOR_CONJUNTOS.test(this.el_conjunto_estado.innerText)
+        return this.el_conjunto_estado != undefined && this.isConjuntos(this.el_conjunto_estado.innerText)
     }
 
     get alfaberto() {
@@ -79,16 +79,16 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     isAlfaberto() {
-        return this.el_alfaberto != undefined && VALIDADOR_CONJUNTOS.test(this.el_alfaberto.innerText)
+        return this.el_alfaberto != undefined && this.isConjuntos(this.el_alfaberto.innerText)
     }
 
     get estado_inicial() {
-        return this.isEstadoInicial() ? this.extrairConjuntos(this.estado_inicial) : []
+        return this.isEstadoInicial() ? this.extrairConjuntos(this.el_estado_inicial) : []
     }
 
     isEstadoInicial() {
         const estado_inicial = this.extrairConjuntos(this.el_estado_inicial)
-        return VALIDADOR_CONJUNTOS.test(this.el_estado_inicial.innerText) && this.pertence(estado_inicial, this.conjunto_estado)
+        return this.isConjuntos(this.el_estado_inicial.innerText) && this.pertence(estado_inicial, this.conjunto_estado)
     }
 
     get estado_final() {
@@ -97,7 +97,7 @@ class AnalisadorSintaticoNonTuplas {
 
     isEstadoFinal() {
         const estado_final = this.extrairConjuntos(this.el_estado_final)
-        return VALIDADOR_CONJUNTOS.test(this.el_estado_final.innerText) && this.pertence(estado_final, this.conjunto_estado)
+        return this.isConjuntos(this.el_estado_final.innerText) && this.pertence(estado_final, this.conjunto_estado)
     }
 
     get estado_nao_final() {
@@ -106,7 +106,9 @@ class AnalisadorSintaticoNonTuplas {
 
     isEstadoNaoFinal() {
         const estado_nao_final = this.extrairConjuntos(this.el_estado_nao_final)
-        return VALIDADOR_CONJUNTOS.test(this.el_estado_nao_final.innerText) && !this.pertence(this.estado_nao_final, this.estado_final) && this.pertence(estado_nao_final, this.conjunto_estado)
+        return this.isConjuntos(this.el_estado_nao_final.innerText) && 
+               !this.pertence(estado_nao_final, this.estado_final) && 
+               this.pertence(estado_nao_final, this.conjunto_estado)
     }
 
     get alfaberto_fita() {
@@ -118,7 +120,11 @@ class AnalisadorSintaticoNonTuplas {
         let ultimo_elemento =  lista_elementos.length - 1
         let penultimo_elemento = lista_elementos.length - 2
 
-        return lista_elementos.length > 2 && this.isConjuntos(this.el_alfaberto_fita.innerText) && this.branco_fita == lista_elementos[ultimo_elemento] && this.delimitador == lista_elementos[penultimo_elemento]
+        return lista_elementos.length > 2 && 
+                this.isConjuntos(this.el_alfaberto_fita.innerText) && 
+                this.isAlfaberto() &&
+                this.branco_fita == lista_elementos[ultimo_elemento] && 
+                this.delimitador == lista_elementos[penultimo_elemento]
     }
 
     isAlfabertoFitaPreenchida() {
@@ -142,6 +148,7 @@ class AnalisadorSintaticoNonTuplas {
 
        if(el != undefined && el != null && el.innerText) {
             const texto = el.innerText.trim()
+            this.ExpressaoRegular.ExtrairValores.EXTRAIR_ELEMENTO_CONJUNTO.lastIndex = 0
             const elementos_lista = texto.match(this.ExpressaoRegular.ExtrairValores.EXTRAIR_ELEMENTO_CONJUNTO)
             const conjuntos = new Set(elementos_lista)
             return [... conjuntos]
@@ -151,7 +158,7 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     isConjuntos(texto) {
-       this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.lastIndex = 0
+        this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.lastIndex = 0
         return this.ExpressaoRegular.Validadores.VALIDADOR_CONJUNTOS.test(texto)
     }
 
@@ -166,6 +173,15 @@ class AnalisadorSintaticoNonTuplas {
             this.delimitador,
             this.branco_fita
         )
+    }
+
+    isNontuplaValida() {
+        return  this.isConjuntosEstado() &&
+                this.isAlfaberto() &&
+                this.isEstadoInicial() &&
+                this.isEstadoNaoFinal() &&
+                this.isEstadoNaoFinal() &&
+                this.isAlfabertoFita()
     }
 }
 
@@ -409,7 +425,7 @@ const tabelaTransicao = new TabelaTransicao(el_tbody_codigo, analisadorSintatico
 el_alfaberto_fita.addEventListener("focusout", () => {
 
     if(analisadorSintaticoNontupla.isAlfabertoFitaPreenchida()) {
-        if(analisadorSintaticoNontupla.isAlfabertoFita()) {
+        if(analisadorSintaticoNontupla.isNontuplaValida()) {
             const gerarTabela = new GerarTabelaTransicao(analisadorSintaticoNontupla.getNontupla(), el_thead_codigo, el_tbody_codigo)
             gerarTabela.gerarTabela()
             tabelaTransicao.monitorandoTabela()

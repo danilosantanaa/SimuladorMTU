@@ -64,6 +64,11 @@ class AnalisadorSintaticoNonTuplas {
         this.el_delimitador = el_delimitador
         this.el_branco_fita = el_branco_fita
         this.ExpressaoRegular = new ExpressaoRegular()
+
+        // Atribuindo eventos
+        this.el_estado_final.addEventListener("focusout", () => {
+            this.estado_final
+        })
     }
 
     get conjunto_estado() {
@@ -92,7 +97,19 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     get estado_final() {
-        return this.isEstadoFinal() ? this.extrairConjuntos(this.el_estado_final) : []
+        if( this.isEstadoFinal()) {
+            const conj_estados_finais = this.extrairConjuntos(this.el_estado_final) 
+
+            // Colocando os estados não finais como padrão
+            this.el_estado_nao_final.innerText = this.conjunto_estado.filter(value => {
+                if(!conj_estados_finais.includes(value)) {
+                    return value
+                }
+            }).join(", ")
+            
+            return conj_estados_finais
+        }
+        return []
     }
 
     isEstadoFinal() {
@@ -123,6 +140,7 @@ class AnalisadorSintaticoNonTuplas {
         return lista_elementos.length > 2 && 
                 this.isConjuntos(this.el_alfaberto_fita.innerText) && 
                 this.isAlfaberto() &&
+                this.isTodosElementoConjuntosPertence(this.alfaberto, lista_elementos) && 
                 this.branco_fita == lista_elementos[ultimo_elemento] && 
                 this.delimitador == lista_elementos[penultimo_elemento]
     }
@@ -142,6 +160,35 @@ class AnalisadorSintaticoNonTuplas {
     /** MÉTODOS AUXILIARES */
     pertence(subconjunto = [], conjunto_universo = []) {
         return subconjunto.filter(x => conjunto_universo.includes(x)).length > 0
+    }
+
+    isConjuntosIguais(conjunto1, conjunto2) {
+
+        if(conjunto1.length == conjunto2.length) {
+
+            let is_igual = true
+
+            for(let i = 0; i < conjunto1.length; i++) {
+                is_igual = is_igual && conjunto1[i] == conjunto2[i]
+            }
+
+            return is_igual
+        }
+
+        return false
+    }
+
+    isTodosElementoConjuntosPertence(subconjunto = [], conjunto_universo = []) {
+        if(conjunto_universo.length >= subconjunto.length) {
+            let is_pertence = true
+            for(let i = 0; i < subconjunto.length; i++) {
+                is_pertence = is_pertence && conjunto_universo.includes(subconjunto[i])
+            }
+
+            return is_pertence
+        }
+
+        return false
     }
 
     extrairConjuntos(el) {
@@ -414,6 +461,7 @@ const el_delimitador = document.querySelector("#delimitador")
 const el_branco_fita = document.querySelector("#branco-fita")
 
 // TABELA DE TRANSIÇÕES
+const el_div_tb_content = document.querySelector(".tb-content")
 const el_thead_codigo = document.querySelector("#tb-cabecalho")
 const el_tbody_codigo = document.querySelector("#tb-corpo")
 
@@ -426,9 +474,14 @@ el_alfaberto_fita.addEventListener("focusout", () => {
 
     if(analisadorSintaticoNontupla.isAlfabertoFitaPreenchida()) {
         if(analisadorSintaticoNontupla.isNontuplaValida()) {
+            el_div_tb_content.classList.add("mostrar")
+            el_div_tb_content.classList.remove("ocultar")
             const gerarTabela = new GerarTabelaTransicao(analisadorSintaticoNontupla.getNontupla(), el_thead_codigo, el_tbody_codigo)
             gerarTabela.gerarTabela()
             tabelaTransicao.monitorandoTabela()
+        } else {
+            el_div_tb_content.classList.add("ocultar")
+            el_div_tb_content.classList.remove("mostrar")
         }
     }
 })

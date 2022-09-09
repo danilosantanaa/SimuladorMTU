@@ -276,6 +276,15 @@ main {
     padding: 0;
 }
 
+.tb-content.ocultar {
+    display: none;
+}
+
+
+.tb-content.mostrar {
+    display: block;
+}
+
 table.codigo {
     width: 100%;
     border-collapse: collapse;

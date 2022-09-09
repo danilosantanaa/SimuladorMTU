@@ -19,7 +19,7 @@ function adicionarElemento(elementoPai, elementoFilho) {
 }
 
 /**
- * 
+ *
  * Tabela de simbolos
  */
 SimbolosEstaticos = {
@@ -139,7 +139,7 @@ class AnalisadorSintaticoNonTuplas {
     }
 
     extrairConjuntos(el) {
-        
+
        if(el != undefined && el != null && el.innerText) {
             const texto = el.innerText.trim()
             const elementos_lista = texto.match(this.ExpressaoRegular.ExtrairValores.EXTRAIR_ELEMENTO_CONJUNTO)
@@ -267,8 +267,8 @@ class GerarTabelaTransicao {
             class: "cmd-linha"
         })
         adicionarElemento(tr, tdlinha)
-        
-        // Linhas Dinamica 
+
+        // Linhas Dinamica
         for(let i = 0; i <= this.totAlfabetoFita(); i++) {
             adicionarElemento(tr, criarElemento("td", null, {
                 "contenteditable": "true"
@@ -290,6 +290,100 @@ class GerarTabelaTransicao {
     }
 }
 
+class TabelaTransicao {
+    constructor(el_tbody, analisadorSintaticoNontupla) {
+        this.el_tbody = el_tbody
+        this._ultima_linha = 0;
+        this.analisadorSintaticoNontupla = analisadorSintaticoNontupla
+
+        // TECLAS
+        this.TECLA_TAB = 9
+        this.TECLA_ENTER = 13
+    }
+
+    get ultima_linha() {
+        return this.getLinhas().length
+    }
+
+    monitorandoTabela() {
+        for(let linha of this.getLinhas()) {
+            for(let coluna of this.getColuna(linha)) {
+                this.ultimaLinhaEvento(linha, coluna)
+            }
+        }
+    }
+
+    ultimaLinhaEvento(linha, coluna) {
+        const obj_escopo = this
+
+        if(this.isUltimaLinha(coluna)) {
+            // Gerar uma nova linha
+            const listener = e => {
+                if(e.keyCode == obj_escopo.TECLA_TAB || e.keyCode == obj_escopo.TECLA_ENTER) {
+                    e.preventDefault()
+                    
+                    const el_nova_linha = obj_escopo.gerarNovaLinha()
+                    obj_escopo.el_tbody.appendChild(el_nova_linha)
+                    obj_escopo.getColuna(el_nova_linha)[1].focus()
+
+                    obj_escopo.monitorandoTabela()
+                    
+                    coluna.removeEventListener("keydown", listener, false)
+                }
+            }
+
+            coluna.addEventListener("keydown", listener, false)
+
+        } else {
+            coluna.addEventListener("keydown", e => {
+                if(obj_escopo.TECLA_ENTER == e.keyCode) {
+                    e.preventDefault()
+                }
+            }, false)
+        }
+    }
+
+    gerarNovaLinha() {
+       const tr = criarElemento("tr")
+       const total_nontuplas = this.analisadorSintaticoNontupla.getNontupla().alfaberto_fita.length + 1
+
+       for(let contador = 0; contador <= total_nontuplas; contador++) {
+            if(contador == 0) { // gera o td com o número da linha
+                tr.appendChild(criarElemento("td", this.ultima_linha + 1, {
+                    class: "cmd-linha"
+                }))
+
+            } else {
+                tr.appendChild(criarElemento("td", null, {
+                    "contenteditable": "true"
+                }))
+            }
+       }
+
+       return tr
+    }
+
+    getLinhas() {
+        return this.el_tbody.querySelectorAll("tr");
+    }
+
+    getColuna(el_linha) {
+        return el_linha.querySelectorAll("td")
+    }
+
+    isUltimaLinha(el_td) {
+        const total_nontuplas = this.analisadorSintaticoNontupla.getNontupla().alfaberto_fita.length
+
+        if(this.getLinhas().length > 0 && total_nontuplas > 0) {
+            const pos_ultima_linha = this.getLinhas().length - 1
+            const pos_ultima_coluna = total_nontuplas
+
+            const ultima_linha = this.getColuna(this.getLinhas()[pos_ultima_linha])
+            return ultima_linha[pos_ultima_coluna + 1] == el_td
+        }
+        return false
+    }
+}
 
 /** DECLARAÇÃO DE VARIAVEIS */
 
@@ -309,6 +403,7 @@ const el_tbody_codigo = document.querySelector("#tb-corpo")
 
 // OBJETOS
 const analisadorSintaticoNontupla = new AnalisadorSintaticoNonTuplas(el_estados, el_alfaberto, el_estado_inicial, el_estado_final, el_estado_nao_final, el_alfaberto_fita, el_delimitador, el_branco_fita)
+const tabelaTransicao = new TabelaTransicao(el_tbody_codigo, analisadorSintaticoNontupla)
 
 /** CHAMADA A EVENTOS */
 el_alfaberto_fita.addEventListener("focusout", () => {
@@ -317,7 +412,7 @@ el_alfaberto_fita.addEventListener("focusout", () => {
         if(analisadorSintaticoNontupla.isAlfabertoFita()) {
             const gerarTabela = new GerarTabelaTransicao(analisadorSintaticoNontupla.getNontupla(), el_thead_codigo, el_tbody_codigo)
             gerarTabela.gerarTabela()
+            tabelaTransicao.monitorandoTabela()
         }
     }
 })
-

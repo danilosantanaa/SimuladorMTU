@@ -13,7 +13,8 @@ function gerarCedulasFitas() {
             }))
         } else {
             adicionarElemento(el_fitas, criarElemento("div", "&#x411;", {
-                class: "cedula"
+                class: "cedula",
+                "contenteditable": "true"
             }))
         }
     }

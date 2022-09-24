@@ -19,7 +19,7 @@
             <div class="saida">
 
                 <div class="estado-atual-container">
-                    <div class="estado" title="Estado Atual">
+                    <div class="estado" id="estado-display" title="Estado Atual">
                         --
                     </div>
                 </div>
@@ -32,9 +32,10 @@
 
                 <div class="entrada-dados">
                     <div class="controls">
-                        <input type="text" id="dados"  placeholder="Entrada..."/>
+                        <!-- <input type="text" id="dados"  placeholder="Entrada..."/> -->
                         <button class="btn executar" title="Executar"><i class="fa-solid fa-play"></i></button>
                         <button class="btn parar" title="Parar"><i class="fa-solid fa-stop"></i></button>
+                        <button class="btn resertar" title="Resertar Fita"><i class="fa-solid fa-arrows-rotate"></i></button>
                         <input type="range" min="1" max="10" value="5" title="Velocidade"/>
                     </div>
                 </div>
@@ -70,7 +71,7 @@
 
                     <div class="inputs">
                         <label for="alfaberto-fita" title="Alfaberto de Fita">&Sigma;F = </label>
-                        <span id="alfaberto-fita" contenteditable="true">, >, b</span>
+                        <span id="alfaberto-fita" contenteditable="true"></span>
                     </div>
 
                     <div class="inputs">
@@ -93,10 +94,12 @@
                         </table>
                     </div>
                 </div>
+              
             </div>
         </main>
     </div>
     <script type="module" src="js/geral.js"></script>
     <script type="module" src="js/analisadores.js"></script>
+    <script type="module" src="js/executor.js"></script>
 </body>
 </html>

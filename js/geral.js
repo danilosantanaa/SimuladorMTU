@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", gerarCedulasFitas);
 function gerarCedulasFitas() {
     el_fitas.innerHTML = ""
 
-    for(let contador = 0; contador < 2500; contador++) {
+    for(let contador = 0; contador < 1000; contador++) {
         if(contador == 0) { // DELIMITADOR
             adicionarElemento(el_fitas, criarElemento("div", "&#9658;", {
                 class: "cedula"

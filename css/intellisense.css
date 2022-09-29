@@ -14,3 +14,13 @@
 .cmd-direcao {
     color: var(--color2);
 }
+
+
+.executar-player {
+    color: red;
+    font-size: 0.6em;
+}
+
+.td-play {
+    color: var(--color3);
+}

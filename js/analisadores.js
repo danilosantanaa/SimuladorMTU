@@ -321,7 +321,9 @@ class GerarTabelaTransicao {
             if(i == 0) {
                 this.el_primeiraLinha = criarElemento("td", null, {
                     "contenteditable": "true",
-                    "estado-apontador": ""
+                    "estado-apontador": "",
+                    "tabindex": "0",
+                    "id": "primeira-linha-focus"
                 })
 
                 adicionarElemento(tr, this.el_primeiraLinha)
@@ -482,9 +484,9 @@ el_alfaberto_fita.addEventListener("focusout", () => {
             gerarTabela.gerarTabela()
             tabelaTransicao.monitorandoTabela()
 
-            if(gerarTabela.el_primeiraLinha != undefined) {
-                gerarTabela.el_primeiraLinha.focus()
-            }
+            // Focando na primeira linha
+            const td_focus = document.querySelector("#primeira-linha-focus")
+            td_focus.focus({focusVisible: true})
 
         } else {
             el_div_tb_content.classList.add("ocultar")
@@ -561,6 +563,15 @@ class Linguagem {
         }
 
         this.qtdCedulaPercorrida = 0;
+
+        // Variavel de controle
+        this.el_btn_parar = document.querySelector(".btn.parar")
+        this.is_stop = false
+
+        const escopo = this
+        this.el_btn_parar.addEventListener("click", () => {
+            escopo.is_stop = true
+        }, true)
     }
 
     get cadeia() {
@@ -623,6 +634,9 @@ class Linguagem {
     // Executa a sequência de comandos
     async executarComandos() {
         this.mostrarBarraRolagem()
+
+        const tr_cmds = this.el_tbody.querySelectorAll("tr")
+    
         // Resertando configurações de estilo colocaod pelo script
         this.ponteiro.style.left = '0px'
         this.el_fita.scrollLeft = 0
@@ -637,7 +651,7 @@ class Linguagem {
         const POS_INVALIDA = -1
         if(this.sequenciaTokens.length > 0) {
             let contador = 0;
-            while( contador < this.el_entrada.length && contador >= 0) {
+            while( contador < this.el_entrada.length && contador >= 0 && !this.is_stop) {
                 // Ler a cedula da fita
                 let entrada = this.el_entrada[contador].innerText.trim()
 
@@ -649,6 +663,12 @@ class Linguagem {
                 if(pos_alfaberto_fita != POS_INVALIDA && pos_estado_ponteiro != POS_INVALIDA) {
                     let cmd = this.sequenciaTokens[pos_estado_ponteiro][pos_alfaberto_fita]
 
+                    // Marca a tabela atual que esta sendo executado
+                    let el_cedula = tr_cmds[pos_estado_ponteiro].querySelectorAll("td:not(.cmd-linha)")[pos_alfaberto_fita]
+                    let el_cedula_original = el_cedula.innerHTML
+                    el_cedula.innerHTML = "<i class='fa-solid fa-play executar-player'></i> " + el_cedula_original
+
+                    // Estado atual de executação
                     estado_atual = cmd.conteudo.estado
 
                     // Mostra o estado atual de execução
@@ -658,6 +678,7 @@ class Linguagem {
                     if(cmd.conteudo.direcao == Dicionario.MOVER.R) {
                         this.el_entrada[contador].innerText = cmd.conteudo.valor
                         await this.moverDireita(this.el_entrada[contador])
+                        el_cedula.innerHTML = el_cedula_original
                         contador++
                     }
                     
@@ -665,6 +686,7 @@ class Linguagem {
                     if(cmd.conteudo.direcao == Dicionario.MOVER.L) {
                         this.el_entrada[contador].innerText = cmd.conteudo.valor
                         await this.moverEsquerda(this.el_entrada[contador])
+                        el_cedula.innerHTML = el_cedula_original
                         contador--
                     }
 
@@ -672,6 +694,8 @@ class Linguagem {
                     if(cmd.conteudo.direcao == Dicionario.MOVER.P) {
                         await this.dormir(300);
                         this.el_entrada[contador].innerText = cmd.conteudo.valor
+                        el_cedula.innerHTML = el_cedula_original
+                        await this.dormir(300);
                         break
                     }
 
@@ -724,12 +748,13 @@ class Linguagem {
         const coords_cedula = el_cedula.getBoundingClientRect()
         const coords_fita = this.el_fita.getBoundingClientRect()
 
-        if(this.qtdCedulaPercorrida * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2) {
+        if(this.qtdCedulaPercorrida * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2 && this.el_fita.scrollWidth - coords_fita.width != this.el_fita.scrollLeft) {
             let inicio = this.el_fita.scrollLeft
             for(let i = inicio; i <= inicio + coords_cedula.width; i++) {
                 await this.dormir(10)
                 this.el_fita.scrollLeft = i
             }
+            await this.dormir(50)
         } else {
             for(let i = this.ponteiro.offsetLeft; i < coords_cedula.left + coords_cedula.width / 2; i++) {
                 await this.dormir(10)
@@ -764,6 +789,7 @@ class Linguagem {
                 await this.dormir(10)
                 this.el_fita.scrollLeft = i
             }
+            await this.dormir(50)
         }
     }
 

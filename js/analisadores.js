@@ -559,6 +559,8 @@ class Linguagem {
                 simbolo2: "Б"
             }
         }
+
+        this.qtdCedulaPercorrida = 0;
     }
 
     get cadeia() {
@@ -608,9 +610,19 @@ class Linguagem {
         }
     }
 
+    mostrarBarraRolagem() {
+        if(this.el_fita.classList.contains("rolagem")) {
+            this.el_fita.classList.remove("rolagem")
+            this.ponteiro.classList.add("rolagem")
+        } else {
+            this.el_fita.classList.add("rolagem")
+            this.ponteiro.classList.remove("rolagem")
+        }
+    }
+
     // Executa a sequência de comandos
     async executarComandos() {
-
+        this.mostrarBarraRolagem()
         // Resertando configurações de estilo colocaod pelo script
         this.ponteiro.style.left = '0px'
         this.el_fita.scrollLeft = 0
@@ -669,6 +681,8 @@ class Linguagem {
                 }
             }
         }
+
+        this.mostrarBarraRolagem()
     }
 
     // Executa o comandos e mostra a fita
@@ -704,28 +718,52 @@ class Linguagem {
 
     // Move o cabecote para o lado direto da fita
     async moverDireita(el_cedula) {
-        await this.dormir(500)
-        const elemCedula = el_cedula.getBoundingClientRect()
+        this.qtdCedulaPercorrida++;
+        await this.dormir(100)
         
-        // Move o cabeçote na celula
-        this.ponteiro.style.left = `${elemCedula.x - 6.5 + elemCedula.width / 2}px`
+        const coords_cedula = el_cedula.getBoundingClientRect()
+        const coords_fita = this.el_fita.getBoundingClientRect()
 
-        if(this.el_fita.clientWidth < elemCedula.left + elemCedula.width / 2) {
-            this.el_fita.scrollLeft += elemCedula.x
+        if(this.qtdCedulaPercorrida * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2) {
+            let inicio = this.el_fita.scrollLeft
+            for(let i = inicio; i <= inicio + coords_cedula.width; i++) {
+                await this.dormir(10)
+                this.el_fita.scrollLeft = i
+            }
+        } else {
+            for(let i = this.ponteiro.offsetLeft; i < coords_cedula.left + coords_cedula.width / 2; i++) {
+                await this.dormir(10)
+                this.ponteiro.style.left = `${i}px`
+            }
         }
+
+
     }
 
 
     // Move o cabeçote para lado esquerdo da fita
     async moverEsquerda(el_cedula) {
-        await this.dormir(500)
-        const elemFita = this.el_fita.getBoundingClientRect()
-        const elemCedula = el_cedula.getBoundingClientRect()
+        this.qtdCedulaPercorrida--
+        await this.dormir(100)
+        
+        const coords_cedula = el_cedula.getBoundingClientRect()
+        const coords_fita = this.el_fita.getBoundingClientRect()
 
-        this.ponteiro.style.left = `${this.ponteiro.offsetLeft - this.ponteiro.offsetWidth}px`
+        if(this.qtdCedulaPercorrida * coords_cedula.width < coords_fita.width / 2 - coords_cedula.width / 2) {
+            let final =  this.ponteiro.offsetLeft
+            let inicio = final - coords_cedula.width
 
-        if(this.el_fita.clientWidth > elemCedula.left + elemCedula.width / 2 && this.el_fita.scrollLeft - elemCedula.x > 0) {
-            this.el_fita.scrollLeft -= elemCedula.x
+            for(let i = final; i >= inicio; i--) {
+                await this.dormir(10)
+                this.ponteiro.style.left = `${i}px`
+            }
+        } else {
+            let final = this.el_fita.scrollLeft
+            let inicio = final - coords_cedula.width
+            for(let i = final ; i >= inicio ; i--) {
+                await this.dormir(10)
+                this.el_fita.scrollLeft = i
+            }
         }
     }
 

@@ -24,3 +24,7 @@
 .td-play {
     color: var(--color3);
 }
+
+.erro-code {
+    color: red;
+}

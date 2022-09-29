@@ -240,7 +240,7 @@ main {
 }
 
 .entrada > .nontuplas > .inputs > label {
-    color: var(--color4);
+    color: black;
     font-weight: bolder;
 }
 
@@ -250,7 +250,10 @@ main {
     width: fit-content;
     padding: 10px 0px;
     cursor: text;
-    color: var(--color1);
+}
+
+.inputs {
+    color: black;
 }
 
 .entrada > .nontuplas > .inputs > .const {

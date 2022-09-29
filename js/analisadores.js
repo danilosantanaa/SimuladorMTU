@@ -39,15 +39,112 @@ class AnalisadorSintaticoNonTuplas {
         this.el_delimitador = el_delimitador
         this.el_branco_fita = el_branco_fita
         this.ExpressaoRegular = new ExpressaoRegular()
+        
+        // Tabela de transicao
+        this.el_div_tb_content = document.querySelector(".tb-content")
+        this.el_thead_codigo = document.querySelector("#tb-cabecalho")
+        this.el_tbody_codigo = document.querySelector("#tb-corpo")
+        
+        this.tabelaTransicao = new TabelaTransicao(this.el_tbody_codigo, this)
+        
+        // Atribuindo eventos a cada elemento da nontupla
+        this.eventosFocusOut()
+    }
 
-        // Atribuindo eventos
+    eventosFocusOut() {
+        this.el_conjunto_estado.addEventListener("focusout", () => {
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
+        })
+        
+        this.el_alfaberto.addEventListener("focusout", () => {
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
+        })
+        
+        this.el_estado_inicial.addEventListener("focusout", () => {
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
+        })
+
         this.el_estado_final.addEventListener("focusout", () => {
             this.estado_final
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
         })
 
-        this.el_alfaberto.addEventListener("focusout", () => {
-            this.el_alfaberto_fita.innerText = `${this.alfaberto.join(",")}, ${this.delimitador}, ${this.branco_fita}`
+        this.el_estado_nao_final.addEventListener("focusout", () => {
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
         })
+
+        this.el_alfaberto_fita.addEventListener("focusout", () => {
+            this.preencherCamposAutomaticamente()
+            this.verificarLocaisNoErros()
+            this.gerarTabela()
+        })
+    }
+
+    verificarLocaisNoErros() {
+        this.atribuirErro(this.el_conjunto_estado, this.isConjuntosEstado())
+        this.atribuirErro(this.el_alfaberto, this.isAlfaberto())
+        this.atribuirErro(this.el_estado_inicial, this.isEstadoInicial())
+        this.atribuirErro(this.el_estado_final, this.isEstadoFinal())
+        this.atribuirErro(this.el_alfaberto_fita, this.isAlfabertoFita())
+    }
+
+    atribuirErro(el, status) {
+        if(el.classList.contains("erro-code") && el.innerText.trim() != "") {
+                if(status) {
+                    el.classList.remove("erro-code")
+                    el.removeAttribute("title")
+                }
+            } else {
+                if(!status && el.innerText.trim() != "") {
+                    el.classList.add("erro-code")
+                    el.setAttribute("title", "Conjunto Inválido")
+                }
+            } 
+    }
+
+    gerarTabela() {
+        if(this.isAlfabertoFitaPreenchida()) {
+            if(this.isNontuplaValida()) {
+                this.el_div_tb_content.classList.add("mostrar")
+                this.el_div_tb_content.classList.remove("ocultar")
+                const gerarTabela = new GerarTabelaTransicao(this.getNontupla(), el_thead_codigo, el_tbody_codigo)
+                gerarTabela.gerarTabela()
+                tabelaTransicao.monitorandoTabela()
+    
+                // Focando na primeira linha
+                const td_focus = document.querySelector("#primeira-linha-focus")
+                td_focus.focus({focusVisible: true})
+    
+            } else {
+                this.el_div_tb_content.classList.add("ocultar")
+                this.el_div_tb_content.classList.remove("mostrar")
+            }
+        }
+    }
+
+    preencherCamposAutomaticamente() {
+        if(this.isAlfaberto()) {
+            this.el_alfaberto_fita.innerText = `${this.alfaberto.join(",")}, ${this.delimitador}, ${this.branco_fita}`
+        }
+
+        if(this.isEstadoFinal()) {
+            // Colocando os estados não finais como padrão
+            this.el_estado_nao_final.innerText = this.conjunto_estado.filter(value => {
+                if(!this.estado_final.includes(value)) {
+                    return value
+                }
+            }).join(", ")
+        }
     }
 
     get conjunto_estado() {
@@ -83,14 +180,6 @@ class AnalisadorSintaticoNonTuplas {
     get estado_final() {
         if( this.isEstadoFinal()) {
             const conj_estados_finais = this.extrairConjuntos(this.el_estado_final) 
-
-            // Colocando os estados não finais como padrão
-            this.el_estado_nao_final.innerText = this.conjunto_estado.filter(value => {
-                if(!conj_estados_finais.includes(value)) {
-                    return value
-                }
-            }).join(", ")
-            
             return conj_estados_finais
         }
         return []
@@ -476,23 +565,7 @@ const tabelaTransicao = new TabelaTransicao(el_tbody_codigo, analisadorSintatico
 /** CHAMADA A EVENTOS */
 el_alfaberto_fita.addEventListener("focusout", () => {
 
-    if(analisadorSintaticoNontupla.isAlfabertoFitaPreenchida()) {
-        if(analisadorSintaticoNontupla.isNontuplaValida()) {
-            el_div_tb_content.classList.add("mostrar")
-            el_div_tb_content.classList.remove("ocultar")
-            const gerarTabela = new GerarTabelaTransicao(analisadorSintaticoNontupla.getNontupla(), el_thead_codigo, el_tbody_codigo)
-            gerarTabela.gerarTabela()
-            tabelaTransicao.monitorandoTabela()
-
-            // Focando na primeira linha
-            const td_focus = document.querySelector("#primeira-linha-focus")
-            td_focus.focus({focusVisible: true})
-
-        } else {
-            el_div_tb_content.classList.add("ocultar")
-            el_div_tb_content.classList.remove("mostrar")
-        }
-    }
+    
 })
 
 

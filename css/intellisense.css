@@ -28,3 +28,7 @@
 .erro-code {
     color: red;
 }
+
+td[estado-apontador] {
+    color: blue;
+}

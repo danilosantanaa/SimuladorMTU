@@ -84,7 +84,6 @@ class AnalisadorSintaticoNonTuplas {
         })
 
         this.el_alfaberto_fita.addEventListener("focusout", () => {
-            this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela()
         })

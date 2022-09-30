@@ -614,6 +614,7 @@ const Dicionario = {
 
 class Linguagem {
     constructor(el_tbody, obj_nontuplas) {
+        const escopo = this
         this.el_fita = document.querySelector(".fitas")
         this.el_entrada = document.querySelectorAll(".fitas > div")
         this.el_tbody = el_tbody
@@ -635,16 +636,29 @@ class Linguagem {
         }
 
         this.qtdCedulaPercorrida = 0;
-
+        
         // Variavel de controle
         this.el_btn_parar = document.querySelector(".btn.parar")
         this.is_stop = false
-
-        const escopo = this
+        
         this.el_btn_parar.addEventListener("click", () => {
             escopo.is_stop = true
         }, true)
+        
+        
+        this.el_range_input = document.querySelector("#velocidade")
+        this.calcularVelocidade()
+        
+        this.time = 500 * Number(this.el_range_input.value) / 
+        this.el_range_input.addEventListener("change", (e) => {
+            this.calcularVelocidade()
+        })
     }
+
+    calcularVelocidade() {
+        const valorAtual = Number(this.el_range_input.value)
+        this.time = Math.floor(1 / valorAtual * 500)
+    } 
 
     get cadeia() {
         return this.el_entrada.value.replaceAll(" ", "")
@@ -764,10 +778,10 @@ class Linguagem {
 
                     // Verifica se houve comando de parada
                     if(cmd.conteudo.direcao == Dicionario.MOVER.P) {
-                        await this.dormir(300);
+                        await this.dormir(parseInt(this.time / 2));
                         this.el_entrada[contador].innerText = cmd.conteudo.valor
                         el_cedula.innerHTML = el_cedula_original
-                        await this.dormir(300);
+                        await this.dormir(parseInt(this.time / 2));
                         break
                     }
 
@@ -815,21 +829,23 @@ class Linguagem {
     // Move o cabecote para o lado direto da fita
     async moverDireita(el_cedula) {
         this.qtdCedulaPercorrida++;
-        await this.dormir(100)
+        await this.dormir(this.time)
         
         const coords_cedula = el_cedula.getBoundingClientRect()
         const coords_fita = this.el_fita.getBoundingClientRect()
 
+        this.calcularVelocidade()
+        const quadro_por_segundos = Math.floor(10 * this.time / 500)
         if(this.qtdCedulaPercorrida * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2 && this.el_fita.scrollWidth - coords_fita.width != this.el_fita.scrollLeft) {
             let inicio = this.el_fita.scrollLeft
             for(let i = inicio; i <= inicio + coords_cedula.width; i++) {
-                await this.dormir(10)
+                await this.dormir(quadro_por_segundos)
                 this.el_fita.scrollLeft = i
             }
-            await this.dormir(50)
+            await this.dormir(quadro_por_segundos)
         } else {
             for(let i = this.ponteiro.offsetLeft; i < coords_cedula.left + coords_cedula.width / 2; i++) {
-                await this.dormir(10)
+                await this.dormir(quadro_por_segundos)
                 this.ponteiro.style.left = `${i}px`
             }
         }
@@ -841,27 +857,29 @@ class Linguagem {
     // Move o cabeçote para lado esquerdo da fita
     async moverEsquerda(el_cedula) {
         this.qtdCedulaPercorrida--
-        await this.dormir(100)
+        await this.dormir(this.time)
         
         const coords_cedula = el_cedula.getBoundingClientRect()
         const coords_fita = this.el_fita.getBoundingClientRect()
 
+        this.calcularVelocidade()
+        const quadro_por_segundos = Math.floor(10 * this.time / 500)
         if(this.qtdCedulaPercorrida * coords_cedula.width < coords_fita.width / 2 - coords_cedula.width / 2) {
             let final =  this.ponteiro.offsetLeft
             let inicio = final - coords_cedula.width
 
             for(let i = final; i >= inicio; i--) {
-                await this.dormir(10)
+                await this.dormir(quadro_por_segundos)
                 this.ponteiro.style.left = `${i}px`
             }
         } else {
             let final = this.el_fita.scrollLeft
             let inicio = final - coords_cedula.width
             for(let i = final ; i >= inicio ; i--) {
-                await this.dormir(10)
+                await this.dormir(quadro_por_segundos)
                 this.el_fita.scrollLeft = i
             }
-            await this.dormir(50)
+            await this.dormir(quadro_por_segundos)
         }
     }
 

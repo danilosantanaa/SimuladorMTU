@@ -19,7 +19,9 @@ const SimbolosEstaticos = {
 class ExpressaoRegular {
     constructor() {
         this.Validadores = {
-            VALIDADOR_CONJUNTOS: /^(\s*[a-zA-Z0-9\>]+\s*)(\,\s*[a-zA-Z0-9\>]+\s*)*$/g
+            VALIDADOR_CONJUNTOS: /^(\s*[a-zA-Z0-9\>]+\s*)(\,\s*[a-zA-Z0-9\>]+\s*)*$/g,
+            VALIDAR_PONTEIRO: /^[a-zA-Z0-9]+$/g,
+            VALIDAR_COMANDOS: /^([a-zA-Z0-9]+)\s+([a-zA-Z0-9\>\Б\►]+)\s+([R|L|P])$/g
         }
 
         this.ExtrairValores = {
@@ -561,13 +563,6 @@ const el_tbody_codigo = document.querySelector("#tb-corpo")
 const analisadorSintaticoNontupla = new AnalisadorSintaticoNonTuplas(el_estados, el_alfaberto, el_estado_inicial, el_estado_final, el_estado_nao_final, el_alfaberto_fita, el_delimitador, el_branco_fita)
 const tabelaTransicao = new TabelaTransicao(el_tbody_codigo, analisadorSintaticoNontupla)
 
-/** CHAMADA A EVENTOS */
-el_alfaberto_fita.addEventListener("focusout", () => {
-
-    
-})
-
-
 const Dicionario = {
     MOVER: {
         R: "R",
@@ -581,37 +576,6 @@ const Dicionario = {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Linguagem {
     constructor(el_tbody, obj_nontuplas) {
         const escopo = this
@@ -620,9 +584,27 @@ class Linguagem {
         this.el_tbody = el_tbody
         this.obj_nontuplas = obj_nontuplas
         this.ponteiro = document.querySelector("#cabecote")
+        this.el_cli = document.querySelector(".cli")
 
-        this.sequenciaTokens = []
-        this.lookahead = null
+        // FASE DO ANALISADOR
+        this.comandosExecutar = []
+        this.lookahead = 0
+        this.TOKENS = {
+            ESTADO_PONTEIRO: 100,
+            ESTADO: 200,
+            ALFABERTOFITA: 300,
+            MOVIMENTO: 400
+        }
+
+        // ARMAZENA A LISTA DE TOKENS IDENTIFICADO NA FASE LEXICA
+        this.listStmts = []
+
+        // GUARDAR OS ERROS DETECTADOS NA FASE DA ANALISE LEXICA E SINTATICA
+        this.totErroLexico = 0
+        this.totErroSintatico = 0
+        this.erroListLexico = []
+        this.erroListSintatico = []
+
         this.caracter_especial = {
             delimitador: {
                 simbolo1: ">",
@@ -678,33 +660,212 @@ class Linguagem {
     }
 
     lerTabela() {
-        this.sequenciaTokens = []
+
+        // Analise lexica
+        this.comandosExecutar = []
         let totLinha = 1
         for(let linha of this.el_tbody.querySelectorAll("tr")) {
             const elementos = []
+            
             let totColuna = 1
             for(let coluna of linha.querySelectorAll("td:not(.cmd-linha)")) {
-                let cmds = coluna.innerText.trim().split(" ") 
-                elementos.push({
-                    conteudo: {
-                        estado: cmds[0],
-                        valor: cmds.length == 3 ? cmds[1] : null,
-                        direcao: cmds.length == 3 ? String(cmds[2]).toLocaleUpperCase() : null
-                    },
-                    linha: totLinha,
-                    coluna: totColuna,
-                    tipo: totColuna == 1 ? Dicionario.TIPO_TOKEN.PONTEIRO : Dicionario.TIPO_TOKEN.COMANDO
-                })
-
+                
+                let stmt = this.analisadorLexico(coluna.innerText.trim(), totLinha, totColuna)
+                if(stmt != undefined) {
+                    elementos.push(stmt)
+                }
                 totColuna++
             }
             
-            // Verificando se o ponteiro foi informado
-            if(elementos.some(el => el.conteudo.estado != "")) {
-                this.sequenciaTokens.push(elementos)
-            }
+            this.comandosExecutar.push(elementos)
+            
             totLinha++
         }
+        
+        const el_erros_list = this.el_cli.querySelector("ul")
+        el_erros_list.innerHTML = ""
+        
+        // Analise sintatica
+        if(this.totErroLexico == 0) {
+            this.programa()
+
+            if(this.totErroSintatico > 0) {
+                this.el_cli.style.display = 'block'
+                for(let i = 0; i < this.erroListSintatico.length; i++) {
+                    let li = criarElemento("li")
+                    li.innerHTML = `(linha ${this.erroListSintatico[i].linha}, coluna ${this.erroListSintatico[i].coluna})${this.erroListSintatico[i].mensagem}`
+
+                    adicionarElemento(el_erros_list, li)
+                }    
+            }
+        } else {
+            this.el_cli.style.display = 'block'
+            for(let i = 0; i < this.erroListLexico.length; i++) {
+                let li = criarElemento("li")
+                li.innerHTML = `(linha ${this.erroListLexico[i].linha}, coluna ${this.erroListLexico[i].coluna})${this.erroListLexico[i].mensagem}`
+
+                adicionarElemento(el_erros_list, li)
+            }     
+        }
+    }
+
+    analisadorLexico(valor = "", linha, coluna) {
+        let stmt = undefined
+
+        if(valor != "") {
+            const expr_regular = new ExpressaoRegular()
+
+            if(expr_regular.Validadores.VALIDAR_PONTEIRO.test(valor)) {
+                stmt =  {
+                    conteudo: {
+                        estado: valor,
+                        valor: undefined,
+                        direcao: undefined
+                    },
+                    linha,
+                    coluna,
+                    tipo: Dicionario.TIPO_TOKEN.PONTEIRO
+                }
+
+                this.listStmts.push({
+                    token: this.TOKENS.ESTADO_PONTEIRO,
+                    valor: valor,
+                    linha,
+                    coluna
+                })
+                
+            } else if(expr_regular.Validadores.VALIDAR_COMANDOS.test(valor)) {
+                let cmds = valor.split(" ")
+                stmt =  {
+                    conteudo: {
+                        estado: cmds[0],
+                        valor: cmds[1],
+                        direcao: cmds[2]
+                    },
+                    linha,
+                    coluna,
+                    tipo: Dicionario.TIPO_TOKEN.COMANDO
+                }
+
+                this.listStmts.push({
+                    token: this.TOKENS.ESTADO,
+                    valor: cmds[0],
+                    linha,
+                    coluna
+                }, {
+                    token: this.TOKENS.ALFABERTOFITA,
+                    valor: cmds[1],
+                    linha,
+                    coluna 
+                }, {
+                    token: this.TOKENS.MOVIMENTO,
+                    valor: cmds[2],
+                    linha,
+                    coluna
+                })
+
+            } else {
+                this.erroLexico(`<span class='erro-code'>Token <strong>"${valor}"</strong> inválido!</span>`, linha, coluna)
+            }
+        }
+
+        return stmt
+    }
+
+    erroLexico(msg, linha, coluna) {
+        this.erroListLexico.push({
+            mensagem: msg,
+            linha,
+            coluna
+        })
+
+        this.totErroLexico++
+    }
+
+    programa() {
+        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO_PONTEIRO) {
+            this.ponteiroa()
+            this.comando()
+            this.programa()
+        }
+    }
+
+    ponteiroa() {
+        const stmt = this.listStmts[this.lookahead]    
+        if(stmt.token == this.TOKENS.ESTADO_PONTEIRO) {
+            
+            // Verifica se o estado apontador pertence ao conjunto de estados
+            const valido = this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)
+
+            if(!valido) {
+                this.erroSintatico(`<span class='erro-code'>O estado "${stmt.valor}" não pertence ao conjunto de estados na nontuplas!</span>`, stmt)
+            }
+
+            this.reconhecer()
+        } else {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado apontador válido.</span>`, stmt)
+        }
+    }
+
+    comando() {
+        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO) {
+            this.estado()
+            this.alfabertoFita()
+            this.movimento()
+            this.comando()
+        }
+    }
+
+    estado() {
+        const stmt = this.listStmts[this.lookahead]
+        if(stmt.token == this.TOKENS.ESTADO) {
+        
+            // Verifica se o estado apontador pertence ao conjunto de estados
+            const valido = this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)
+
+            if(!valido) {
+                this.erroSintatico(`<span class='erro-code'>O estado "${stmt.valor}" não pertence ao conjunto de estados na nontuplas!</span>`, stmt)
+            }
+
+            this.reconhecer()
+        } else {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
+        }
+    }
+   
+    alfabertoFita() {
+        const stmt = this.listStmts[this.lookahead]
+        
+        if(stmt.token == this.TOKENS.ALFABERTOFITA) {
+
+            // Verifica se o alfaberto de fita informado, pertence ao conjunto do alfaberto da fita informada na nontupla
+            const valido = this.obj_nontuplas.alfaberto_fita.some(alfaberto_fita => alfaberto_fita == stmt.valor)
+
+            if(!valido) {
+                this.erroSintatico(`<span class='erro-code'>O alfaberto de fita "${stmt.valor}" não pertence ao conjunto do alfaberto de fita informado na nontupla!</span>`, stmt)
+            }
+
+            this.reconhecer()
+        } else {
+            this.erroSintatico("<span class='erro-code'>Esperava um alfaberto de fita válido.</span>", stmt)
+        }
+    }
+
+    movimento() {
+        if(this.listStmts[this.lookahead].token == this.TOKENS.MOVIMENTO) {
+           this.reconhecer()
+        } else {
+            this.erroSintatico("<span class='erro-code'>Esperava um movimentador. Sendo ou L ou P ou R</span>", )
+        }
+    }
+
+    reconhecer() {
+        this.lookahead++
+    }
+
+    erroSintatico(mensagem, stmt) {
+        this.totErroSintatico++
+        this.erroListSintatico.push({ mensagem, linha: stmt.linha, coluna: stmt.coluna })
     }
 
     mostrarBarraRolagem() {
@@ -735,7 +896,7 @@ class Linguagem {
         el_estado_display.innerText = estado_atual
 
         const POS_INVALIDA = -1
-        if(this.sequenciaTokens.length > 0) {
+        if(this.comandosExecutar.length > 0 && this.totErroLexico == 0 && this.totErroSintatico == 0) {
             let contador = 0;
             while( contador < this.el_entrada.length && contador >= 0 && !this.is_stop) {
                 // Ler a cedula da fita
@@ -747,7 +908,7 @@ class Linguagem {
                 
                 // Verifica se o comando foi encontrado
                 if(pos_alfaberto_fita != POS_INVALIDA && pos_estado_ponteiro != POS_INVALIDA) {
-                    let cmd = this.sequenciaTokens[pos_estado_ponteiro][pos_alfaberto_fita]
+                    let cmd = this.comandosExecutar[pos_estado_ponteiro][pos_alfaberto_fita]
 
                     // Marca a tabela atual que esta sendo executado
                     let el_cedula = tr_cmds[pos_estado_ponteiro].querySelectorAll("td:not(.cmd-linha)")[pos_alfaberto_fita]
@@ -816,8 +977,8 @@ class Linguagem {
     // Retorna o comando aonde estar o estado atual da tabela
     getComandos(estado) {
         const POS_PONTEIRO = 0
-        for(let i = 0; i < this.sequenciaTokens.length; i++) {
-            if(this.sequenciaTokens[i][POS_PONTEIRO].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado == this.sequenciaTokens[i][POS_PONTEIRO].conteudo.estado ) {
+        for(let i = 0; i < this.comandosExecutar.length; i++) {
+            if(this.comandosExecutar[i][POS_PONTEIRO].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado == this.comandosExecutar[i][POS_PONTEIRO].conteudo.estado ) {
                 return i
             }
         }
@@ -883,7 +1044,7 @@ class Linguagem {
     }
 
     pontoExecucao(estado_atual) {
-        return this.sequenciaTokens.find(x => x[0].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado_atual == x.conteudo.estado)
+        return this.comandosExecutar.find(x => x[0].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado_atual == x.conteudo.estado)
     }
 
     async dormir(ms) {
@@ -899,7 +1060,7 @@ const el_btn_resertar = document.querySelector(".btn.resertar")
 el_btn_executar.addEventListener("click", async() => {
     const linguagem = new Linguagem(el_tbody_codigo, analisadorSintaticoNontupla.getNontupla())
     linguagem.lerTabela()
-    console.log(" Teste ", linguagem.sequenciaTokens)
+    console.log(" Teste ", linguagem.comandosExecutar)
 
     await linguagem.executarComandos()
 }, true)

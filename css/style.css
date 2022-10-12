@@ -145,6 +145,19 @@ main {
     display: flex;
 }
 
+.cli {
+    display: none;
+    background: black;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+    margin-bottom: 10px;
+    height: 100px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    transition: all 2s ease-in-out;
+}
+
 .entrada-dados {
     display: flex;
     flex-direction: row;

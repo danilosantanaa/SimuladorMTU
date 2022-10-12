@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, trocarValores } from "./ManipularDOM.js"
 
 /**
  *
@@ -760,9 +760,10 @@ class Linguagem {
                     // Mostra o estado atual de execução
                     el_estado_display.innerText = estado_atual
 
+                    trocarValores(this.el_entrada[contador], cmd.conteudo.valor)
+                    
                     // Verifica se esta movendo para a direita
                     if(cmd.conteudo.direcao == Dicionario.MOVER.R) {
-                        this.el_entrada[contador].innerText = cmd.conteudo.valor
                         await this.moverDireita(this.el_entrada[contador])
                         el_cedula.innerHTML = el_cedula_original
                         contador++
@@ -770,7 +771,6 @@ class Linguagem {
                     
                     // Verifica se esta movendo para esquerda
                     if(cmd.conteudo.direcao == Dicionario.MOVER.L) {
-                        this.el_entrada[contador].innerText = cmd.conteudo.valor
                         await this.moverEsquerda(this.el_entrada[contador])
                         el_cedula.innerHTML = el_cedula_original
                         contador--
@@ -779,7 +779,6 @@ class Linguagem {
                     // Verifica se houve comando de parada
                     if(cmd.conteudo.direcao == Dicionario.MOVER.P) {
                         await this.dormir(parseInt(this.time / 2));
-                        this.el_entrada[contador].innerText = cmd.conteudo.valor
                         el_cedula.innerHTML = el_cedula_original
                         await this.dormir(parseInt(this.time / 2));
                         break

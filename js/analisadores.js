@@ -660,7 +660,6 @@ class Linguagem {
     }
 
     lerTabela() {
-
         // Analise lexica
         this.comandosExecutar = []
         let totLinha = 1
@@ -697,6 +696,8 @@ class Linguagem {
 
                     adicionarElemento(el_erros_list, li)
                 }    
+            } else {
+                this.el_cli.style.display = 'none'
             }
         } else {
             this.el_cli.style.display = 'block'

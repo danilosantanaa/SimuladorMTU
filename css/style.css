@@ -152,7 +152,7 @@ main {
     color: white;
     font-family: 'Courier New', Courier, monospace;
     padding: 10px;
-    height: 100px;
+    height: 400px;
     overflow-x: hidden;
     overflow-y: scroll;
     transition: all 2s ease-in-out;

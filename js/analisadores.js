@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento, trocarValores } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais } from "./ManipularDOM.js"
 
 /**
  *
@@ -668,8 +668,12 @@ class Linguagem {
             
             let totColuna = 1
             for(let coluna of linha.querySelectorAll("td:not(.cmd-linha)")) {
-                
-                let stmt = this.analisadorLexico(coluna.innerText.trim(), totLinha, totColuna)
+
+                // Analisando se as lexema estão válido.
+                this.analisadorLexico(coluna.innerText.trim(), totLinha, totColuna)
+
+                // Salvando o código, pode esta salvando código inválido, não há implementação da geração de código intermediario, será feita mais adiante
+                let stmt = this.gerarComandos(coluna.innerText.trim(), totLinha, totColuna)
                 if(stmt != undefined) {
                     elementos.push(stmt)
                 }
@@ -710,7 +714,7 @@ class Linguagem {
         }
     }
 
-    analisadorLexico(valor = "", linha, coluna) {
+    gerarComandos(valor = "", linha, coluna) {
         let stmt = undefined
 
         if(valor != "") {
@@ -727,13 +731,6 @@ class Linguagem {
                     coluna,
                     tipo: Dicionario.TIPO_TOKEN.PONTEIRO
                 }
-
-                this.listStmts.push({
-                    token: this.TOKENS.ESTADO_PONTEIRO,
-                    valor: valor,
-                    linha,
-                    coluna
-                })
                 
             } else if(expr_regular.Validadores.VALIDAR_COMANDOS.test(valor)) {
                 let cmds = valor.split(" ")
@@ -747,30 +744,147 @@ class Linguagem {
                     coluna,
                     tipo: Dicionario.TIPO_TOKEN.COMANDO
                 }
-
-                this.listStmts.push({
-                    token: this.TOKENS.ESTADO,
-                    valor: cmds[0],
-                    linha,
-                    coluna
-                }, {
-                    token: this.TOKENS.ALFABERTOFITA,
-                    valor: cmds[1],
-                    linha,
-                    coluna 
-                }, {
-                    token: this.TOKENS.MOVIMENTO,
-                    valor: cmds[2],
-                    linha,
-                    coluna
-                })
-
-            } else {
-                this.erroLexico(`<span class='erro-code'>Token <strong>"${valor}"</strong> inválido!</span>`, linha, coluna)
-            }
+            } 
         }
 
         return stmt
+    }
+
+    analisadorLexico(lexema, linha, coluna) {
+        let estado = 1;
+        let cadeia = ""
+        let resto_cadeia = ""
+
+        let poscaracterlido = 0
+        lexema += " " // Espaço que será uma frag para indicar final de comando
+        while(poscaracterlido < lexema.length) {
+            let caracter = lexema[poscaracterlido]
+
+            switch(estado) {
+                case 1:
+                    cadeia += caracter
+                    if(caracter == 'q' || caracter == 'Q') {
+                        estado = 2
+                    } else if (caracter >= 'a' && caracter <= 'p' || 
+                               caracter >= 'r' && caracter <= 'z' || 
+                               caracter >= 'A' && caracter <= 'K' || 
+                               caracter >= 'M' && caracter <= 'O' || 
+                               caracter >= 'S' && caracter <= 'Z' || 
+                               caracter == '-' || caracter == '+' || 
+                               caracter == '*' || caracter == '/' || 
+                               caracter >= 0 && caracter <= 9 ||
+                               caracter == SimbolosEspeciais.branco_fita.simbolo1 ||
+                               caracter == SimbolosEspeciais.branco_fita.simbolo2 || 
+                               caracter == SimbolosEspeciais.delimitador.simbolo1 ||
+                               caracter == SimbolosEspeciais.delimitador.simbolo2
+                    ) {
+                        estado = 5
+                    } else if(caracter == 'R' || caracter == 'P' || caracter == 'L') {
+                        estado = 8
+                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                        estado = 1
+                    }
+                    break;
+                case 2:
+                    cadeia += caracter
+                    if(caracter >= '0' && caracter <= '9') {
+                        estado = 3
+                    } else if(caracter != ' '){
+                        estado = 3
+                    } else {
+                        resto_cadeia = caracter
+                        estado = 4
+                    }
+                    break;
+                case 3:
+                    cadeia += caracter
+                    if(caracter >= '0' && caracter <= '9') {
+                        estado = 3
+                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                        estado = 1
+                        this.listStmts.push({
+                            token: this.TOKENS.ESTADO,
+                            valor: cadeia.trim(),
+                            linha,
+                            coluna
+                        })
+
+                        cadeia = ""
+                    } else {
+                        resto_cadeia = caracter
+                        estado = 4
+                    }
+                    break;
+                case 4: // caracteres invalido
+                    cadeia += caracter
+
+                    if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
+                        estado = 4
+                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r'){
+                        this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um ESTADO válido.`, linha, coluna)
+                        cadeia = ""
+                        estado = 1
+                    }
+                    break
+                case 5:
+                    cadeia += caracter
+                    if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                        estado = 1
+                        this.listStmts.push({
+                            token: this.TOKENS.ALFABERTOFITA,
+                            valor: cadeia.trim(),
+                            linha,
+                            coluna
+                        })
+
+                        cadeia = ""
+                    } else {
+                        resto_cadeia = cadeia
+                        estado = 6
+                    }
+                    break;
+                case 6: // estado validador 
+                    cadeia += caracter
+                    if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
+                        estado = 6
+                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                        this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um ALFABERTO DE FITA válido.`, linha, coluna)
+                        estado = 1
+                        cadeia = ""
+                    }
+                    break;
+                case 8:
+                    cadeia += caracter
+                    if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                        estado = 1
+                        this.listStmts.push({
+                            token: this.TOKENS.MOVIMENTO,
+                            valor: cadeia.trim(),
+                            linha,
+                            coluna
+                        })
+
+                        cadeia = ""
+                        estado = 1
+                    } else {
+                        resto_cadeia = caracter
+                        estado = 7
+                    }
+                        break
+                    case 7:
+                        cadeia += caracter
+                        if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
+                            estado = 7
+                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
+                            this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um MOVIMENTO DE FITA válido.`, linha, coluna)
+                            cadeia = ""
+                            estado = 1
+                        }
+                        break;
+            }
+
+            poscaracterlido++
+        }
     }
 
     erroLexico(msg, linha, coluna) {

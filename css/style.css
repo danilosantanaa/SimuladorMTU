@@ -80,7 +80,7 @@ main {
 /* width */
 *::-webkit-scrollbar {
     height: 10px;
-    width: 10px;
+    width: 5px;
 }
 
 .fitas::-webkit-scrollbar {
@@ -93,7 +93,7 @@ main {
 
 /* Track */
 *::-webkit-scrollbar-track {
-    background: var(--color3);
+    background: #d8d8d8;
 }
 
 /* Handle */
@@ -145,20 +145,6 @@ main {
     display: flex;
 }
 
-.cli {
-    position: fixed;
-    display: none;
-    background: black;
-    color: white;
-    font-family: 'Courier New', Courier, monospace;
-    padding: 10px;
-    height: 400px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    transition: all 2s ease-in-out;
-    width: 100%;
-    bottom: 0px;
-}
 
 .entrada-dados {
     display: flex;
@@ -399,6 +385,7 @@ table.codigo tr .cmd-linha.cl-codigo {
     border-left: none;
     border-bottom: none;
 }
+
 
 
 @media screen and (min-width: 700px) {

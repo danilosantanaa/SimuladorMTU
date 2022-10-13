@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais, abrirFecharConsole } from "./ManipularDOM.js"
 
 /**
  *
@@ -584,7 +584,11 @@ class Linguagem {
         this.el_tbody = el_tbody
         this.obj_nontuplas = obj_nontuplas
         this.ponteiro = document.querySelector("#cabecote")
-        this.el_cli = document.querySelector(".cli")
+
+        // Parte que será mostrada no console
+        this.el_cli = document.querySelector(".cmd-line-display")
+        this.el_tot_erros = document.querySelector(".info .erros .tot")
+        this.el_tot_avisos = document.querySelector(".info .avisos .tot")
 
         // FASE DO ANALISADOR
         this.comandosExecutar = []
@@ -694,17 +698,23 @@ class Linguagem {
 
             if(this.totErroSintatico > 0) {
                 this.el_cli.style.display = 'block'
+                abrirFecharConsole(true)
+                
                 for(let i = 0; i < this.erroListSintatico.length; i++) {
                     let li = criarElemento("li")
                     li.innerHTML = `(linha ${this.erroListSintatico[i].linha}, coluna ${this.erroListSintatico[i].coluna})${this.erroListSintatico[i].mensagem}`
 
                     adicionarElemento(el_erros_list, li)
-                }    
+                }   
+                
             } else {
                 this.el_cli.style.display = 'none'
             }
         } else {
             this.el_cli.style.display = 'block'
+            abrirFecharConsole(true)
+            this.el_tot_erros.innerHTML = `(${this.totErroLexico})`
+
             for(let i = 0; i < this.erroListLexico.length; i++) {
                 let li = criarElemento("li")
                 li.innerHTML = `(linha ${this.erroListLexico[i].linha}, coluna ${this.erroListLexico[i].coluna})${this.erroListLexico[i].mensagem}`
@@ -898,8 +908,8 @@ class Linguagem {
     }
 
     programa() {
-        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO_PONTEIRO) {
-            this.ponteiroa()
+        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO) {
+            this.estado()
             this.comando()
             this.programa()
         }
@@ -923,11 +933,14 @@ class Linguagem {
     }
 
     comando() {
-        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO) {
+        const stmt = this.listStmts[this.lookahead];
+        if(this.lookahead < this.listStmts.length && stmt.token == this.TOKENS.ESTADO) {
             this.estado()
             this.alfabertoFita()
             this.movimento()
             this.comando()
+        } else if(stmt != undefined) {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
         }
     }
 
@@ -943,7 +956,7 @@ class Linguagem {
             }
 
             this.reconhecer()
-        } else {
+        } else if(stmt != undefined) {
             this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
         }
     }
@@ -961,16 +974,17 @@ class Linguagem {
             }
 
             this.reconhecer()
-        } else {
+        } else if(stmt != undefined) {
             this.erroSintatico("<span class='erro-code'>Esperava um alfaberto de fita válido.</span>", stmt)
         }
     }
 
     movimento() {
+        const stmt = this.listStmts[this.lookahead]
         if(this.listStmts[this.lookahead].token == this.TOKENS.MOVIMENTO) {
            this.reconhecer()
-        } else {
-            this.erroSintatico("<span class='erro-code'>Esperava um movimentador. Sendo ou L ou P ou R</span>", )
+        } else if(stmt != undefined){
+            this.erroSintatico("<span class='erro-code'>Esperava um movimentador. Sendo ou L ou P ou R</span>", stmt)
         }
     }
 

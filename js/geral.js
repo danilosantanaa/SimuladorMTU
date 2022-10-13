@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento, moverCursorContentEditableFinal, SimbolosEspeciais } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, moverCursorContentEditableFinal, SimbolosEspeciais, abrirFecharConsole } from "./ManipularDOM.js"
 
 const el_fitas = document.querySelector(".fitas")
 document.addEventListener("DOMContentLoaded", gerarCedulasFitas);
@@ -69,3 +69,5 @@ function trocarCaracteres(e) {
     e.target.innerText = e.target.innerText.replace(/b|B/, SimbolosEspeciais.branco_fita.simbolo2)
     e.target.innerText = e.target.innerText.replace(">", SimbolosEspeciais.delimitador.simbolo2)
 }
+
+abrirFecharConsole()

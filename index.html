@@ -7,6 +7,7 @@
     <title>Simulador da Máquina de Turing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dialogs.css">
     <link rel="stylesheet" href="css/intellisense.css">
 </head>
 <body>
@@ -99,9 +100,26 @@
         </main>
     </div>
 
-    <div class="cli">
-        <ul></ul>
+    <div class="cli-content">
+        <div class="header">
+            <div class="info">
+                <button title="Erros" class="erros"><i class="fa-solid fa-circle-xmark"></i> <span class="tot">(0)</span></button>
+                <button title="Avisos" class="avisos"><i class="fa fa-warning"></i> <span class="tot">(0)</span></button>
+            </div>
+            <div class="controles">
+                <button class="fechar-cmd" title="Fechar Console"><i class="fa-solid fa-caret-down"></i></button>
+                <button class="abrir-cmd" title="Abrir Console"><i class="fa-solid fa-caret-up"></i></button>
+            </div>
+        </div>
+        <div class="cli">
+            <div class="cmd-line-display">
+                <p>Aqui aparece todos os erros na compilação do código.</p>
+                
+                <ul></ul>
+            </div>
+        </div>
     </div>
+    
     <script type="module" src="js/geral.js"></script>
     <script type="module" src="js/analisadores.js"></script>
     <script type="module" src="js/executor.js"></script>

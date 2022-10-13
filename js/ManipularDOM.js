@@ -42,10 +42,42 @@ function trocarValores(el, valor) {
     el.innerText = el.innerText.replace(">", SimbolosEspeciais.delimitador.simbolo2)
 }
 
+/** Responsavel por fazer a manipulação do console */
+const cmd =  document.querySelector(".cli-content")
+const btn_fechar_console = cmd.querySelector(".controles > .fechar-cmd")
+const btn_abrir_console = cmd.querySelector(".controles > .abrir-cmd")
+const cli = cmd.querySelector(".cli")
+
+function abrirFecharConsole(abrir_automatico = false) {
+
+    btn_abrir_console.addEventListener("click", abrir)
+    btn_fechar_console.addEventListener("click", fechar)
+
+    if(abrir_automatico) {
+        abrir()
+    }
+}
+
+function abrir() {
+    btn_abrir_console.classList.add("open")
+    btn_fechar_console.classList.add("open")
+    cli.classList.add("open")
+    cli.classList.remove("close")
+}
+
+function fechar() {
+
+    btn_abrir_console.classList.remove("open")
+    btn_fechar_console.classList.remove("open")
+    cli.classList.add("close")
+    cli.classList.remove("open")
+}
+
 export {
     criarElemento,
     adicionarElemento,
     moverCursorContentEditableFinal,
     SimbolosEspeciais,
-    trocarValores
+    trocarValores,
+    abrirFecharConsole
 }

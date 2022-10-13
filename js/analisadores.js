@@ -1,5 +1,5 @@
-import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais, abrirFecharConsole } from "./ManipularDOM.js"
-
+import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais } from "./ManipularDOM.js"
+import { abrirFecharConsole, setTotErro, setTotAvisos} from "./console.js"
 /**
  *
  * Tabela de simbolos
@@ -587,8 +587,6 @@ class Linguagem {
 
         // Parte que será mostrada no console
         this.el_cli = document.querySelector(".cmd-line-display")
-        this.el_tot_erros = document.querySelector(".info .erros .tot")
-        this.el_tot_avisos = document.querySelector(".info .avisos .tot")
 
         // FASE DO ANALISADOR
         this.comandosExecutar = []
@@ -713,7 +711,6 @@ class Linguagem {
         } else {
             this.el_cli.style.display = 'block'
             abrirFecharConsole(true)
-            this.el_tot_erros.innerHTML = `(${this.totErroLexico})`
 
             for(let i = 0; i < this.erroListLexico.length; i++) {
                 let li = criarElemento("li")
@@ -722,6 +719,8 @@ class Linguagem {
                 adicionarElemento(el_erros_list, li)
             }     
         }
+
+        setTotErro(this.totErroLexico + this.totErroSintatico)
     }
 
     gerarComandos(valor = "", linha, coluna) {

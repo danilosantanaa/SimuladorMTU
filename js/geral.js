@@ -1,8 +1,8 @@
-import { criarElemento, adicionarElemento, moverCursorContentEditableFinal, SimbolosEspeciais, abrirFecharConsole } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, SimbolosEspeciais } from "./ManipularDOM.js"
+import { abrirFecharConsole } from "./console.js"
 
 const el_fitas = document.querySelector(".fitas")
 document.addEventListener("DOMContentLoaded", gerarCedulasFitas);
-
 
 // Gerador das cedulas
 function gerarCedulasFitas() {

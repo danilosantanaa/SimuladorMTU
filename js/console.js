@@ -2,12 +2,16 @@
 const cmd =  document.querySelector(".cli-content")
 const btn_fechar_console = cmd.querySelector(".controles > .fechar-cmd")
 const btn_abrir_console = cmd.querySelector(".controles > .abrir-cmd")
+const btn_erros = cmd.querySelector(".erros")
+const btn_avisos = cmd.querySelector(".avisos")
 const cli = cmd.querySelector(".cli")
 
 function abrirFecharConsole(abrir_automatico = false) {
 
     btn_abrir_console.addEventListener("click", abrir)
     btn_fechar_console.addEventListener("click", fechar)
+    btn_erros.addEventListener("click", abrir)
+    btn_avisos.addEventListener("click", abrir)
 
     if(abrir_automatico) {
         abrir()

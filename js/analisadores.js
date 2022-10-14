@@ -691,7 +691,7 @@ class Linguagem {
         el_erros_list.innerHTML = ""
         
         // Analise sintatica
-        if(this.totErroLexico == 0) {
+        if(this.totErroLexico == 0 && this.listStmts.length >= 0) {
             this.programa()
 
             if(this.totErroSintatico > 0) {
@@ -907,28 +907,18 @@ class Linguagem {
     }
 
     programa() {
-        if(this.lookahead < this.listStmts.length && this.listStmts[this.lookahead].token == this.TOKENS.ESTADO) {
+
+        const stmt = this.listStmts[this.lookahead]
+
+        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
             this.estado()
             this.comando()
             this.programa()
-        }
-    }
-
-    ponteiroa() {
-        const stmt = this.listStmts[this.lookahead]    
-        if(stmt.token == this.TOKENS.ESTADO_PONTEIRO) {
-            
-            // Verifica se o estado apontador pertence ao conjunto de estados
-            const valido = this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)
-
-            if(!valido) {
-                this.erroSintatico(`<span class='erro-code'>O estado "${stmt.valor}" não pertence ao conjunto de estados na nontuplas!</span>`, stmt)
-            }
-
+        } else if(stmt != undefined) {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado apontador.</span>`, stmt)
             this.reconhecer()
-        } else {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado apontador válido.</span>`, stmt)
         }
+
     }
 
     comando() {
@@ -940,6 +930,7 @@ class Linguagem {
             this.comando()
         } else if(stmt != undefined) {
             this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
+            this.reconhecer()
         }
     }
 
@@ -954,10 +945,11 @@ class Linguagem {
                 this.erroSintatico(`<span class='erro-code'>O estado "${stmt.valor}" não pertence ao conjunto de estados na nontuplas!</span>`, stmt)
             }
 
-            this.reconhecer()
         } else if(stmt != undefined) {
             this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
         }
+        
+        this.reconhecer()
     }
    
     alfabertoFita() {
@@ -972,19 +964,20 @@ class Linguagem {
                 this.erroSintatico(`<span class='erro-code'>O alfaberto de fita "${stmt.valor}" não pertence ao conjunto do alfaberto de fita informado na nontupla!</span>`, stmt)
             }
 
-            this.reconhecer()
         } else if(stmt != undefined) {
             this.erroSintatico("<span class='erro-code'>Esperava um alfaberto de fita válido.</span>", stmt)
         }
+
+        this.reconhecer()
     }
 
     movimento() {
         const stmt = this.listStmts[this.lookahead]
-        if(this.listStmts[this.lookahead].token == this.TOKENS.MOVIMENTO) {
-           this.reconhecer()
-        } else if(stmt != undefined){
+        if(this.listStmts[this.lookahead].token != this.TOKENS.MOVIMENTO) {
             this.erroSintatico("<span class='erro-code'>Esperava um movimentador. Sendo ou L ou P ou R</span>", stmt)
-        }
+           
+        } 
+        this.reconhecer()
     }
 
     reconhecer() {

@@ -604,6 +604,7 @@ class Linguagem {
         // GUARDAR OS ERROS DETECTADOS NA FASE DA ANALISE LEXICA E SINTATICA
         this.totErroLexico = 0
         this.totErroSintatico = 0
+        this.totColunaLida = 0
         this.erroListLexico = []
         this.erroListSintatico = []
 
@@ -907,30 +908,39 @@ class Linguagem {
     }
 
     programa() {
-
+        this.totColunaLida = 0
         const stmt = this.listStmts[this.lookahead]
-
         if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
+            this.totColunaLida++
             this.estado()
+
+            this.totColunaLida++
+            this.estado()
+            this.alfabertoFita()
+            this.movimento()
+
             this.comando()
             this.programa()
-        } else if(stmt != undefined) {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado apontador.</span>`, stmt)
-            this.reconhecer()
         }
-
     }
 
     comando() {
         const stmt = this.listStmts[this.lookahead];
-        if(this.lookahead < this.listStmts.length && stmt.token == this.TOKENS.ESTADO) {
+        const follow = this.listStmts[this.lookahead + 1]
+
+        if(stmt == undefined && follow == undefined) return
+
+        if(this.lookahead < this.listStmts.length && stmt.token == this.TOKENS.ESTADO && follow != undefined && follow.token == this.TOKENS.ALFABERTOFITA) {
+            this.totColunaLida++
             this.estado()
             this.alfabertoFita()
             this.movimento()
+
             this.comando()
-        } else if(stmt != undefined) {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
-            this.reconhecer()
+        } else if(stmt.token == this.TOKENS.ESTADO && follow.token == this.TOKENS.ESTADO) {
+          this.programa()  
+        } else {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido`, stmt)
         }
     }
 
@@ -946,7 +956,12 @@ class Linguagem {
             }
 
         } else if(stmt != undefined) {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido.</span>`, stmt)
+            if(this.totColunaLida == 2) {
+                this.erroSintatico(`<span class='erro-code'>O Estado apontador inválido! Somente um estado pode está nessa célula.</span>`, stmt)
+                this.comando()
+            } else {
+                this.erroSintatico(`<span class='erro-code'>Esperava um estado</span>`, stmt)
+            }
         }
         
         this.reconhecer()

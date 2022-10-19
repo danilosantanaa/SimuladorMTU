@@ -576,6 +576,229 @@ const Dicionario = {
     }
 }
 
+const ListaTokens = {
+    ESTADO: 100,
+    ALFABERTOFITA: 200,
+    MOVIMENTO: 300,
+    PONTOVIRGULA: 400,
+    FINAL: 500
+}
+
+class AnalisadorLexico {
+    constructor() {
+        this.el_table_row = document.querySelectorAll("#tb-corpo tr")
+        this.string_lang = ""
+        
+        /**
+         * Guardará uma sequência de token no formato [token_id, valor, número da linha]
+         */
+        this.tabelaSimbolos = []
+        this.errorList = []
+
+        this.lerTabela()
+        this.gerarTokens()
+    }
+
+
+    /**
+     * Ler a tabela gerada no HTML e gera a sequência de caracteres
+     */
+    lerTabela() {
+        // Lendo as linhas
+        for(let i = 0; i < this.el_table_row.length; i++) {
+            const table_data = this.el_table_row[i].querySelectorAll("td:not(.cmd-linha)")
+
+            // lendos as colunas
+            for(let j = 0; j < table_data.length; j++) {
+                this.string_lang += `${table_data[j].innerText.trim()}; `
+            }
+
+            this.string_lang += "\n"
+        }
+
+        this.string_lang += "$"; //  Simboliza o fim da string
+    }
+
+    /**
+     * Ler o arquivo e gera a sequência de caracteres
+     */
+    lerArquivo() {
+
+    }
+
+    /**
+     * Será gerado a tabela de símbolos através da implementação do autômato finito deterministico - AFD.
+     * Será gerado a tabela de simbolo que será compartilhado para qualquer fase de analise. 
+     */
+    gerarTokens() {
+        let pos = 0
+        let tot_linha = 1
+        let tot_coluna = 1
+
+        let estado_atual = 0;
+        const ESTADO = {
+            Q0: 0,
+            Q1: 1,
+            Q2: 2,
+            Q3: 3,
+            Q4: 4,
+            Q5: 5,
+            Q6: 6,
+            REJEICAO: 7
+        }
+
+        let cadeia = ""
+        while(pos < this.string_lang.length) {
+            let caracter =  this.string_lang[pos]
+
+            switch(estado_atual) {
+                case ESTADO.Q0:
+                    if(caracter == 'Q' || caracter == 'q') {
+                        estado_atual = ESTADO.Q1
+                        cadeia += caracter
+                    } else if(this.isQuebraLinha(caracter)) {
+                        tot_linha++
+                        tot_coluna = 1
+                    } else if(caracter == ';') {
+                       estado_atual = ESTADO.Q3
+                       cadeia += caracter
+                    } else if(this.isAlfabertoFita(caracter)) {
+                        estado_atual = ESTADO.Q4
+                        cadeia += caracter
+                    } else if(this.isMovimentador(caracter)) {
+                        estado_atual = ESTADO.Q5
+                        cadeia += caracter
+                    } else if(caracter == '$') {
+                        estado_atual = ESTADO.Q6
+                        cadeia += caracter
+                    } else if(!this.isIguinorarCaracter(caracter)) {
+                        estado_atual = ESTADO.REJEICAO
+                        cadeia += caracter
+                    }
+                    break
+                case ESTADO.Q1:
+                    if(this.isNumero(caracter)) {
+                        estado_atual = ESTADO.Q2
+                        cadeia += caracter
+                    } else {
+                        estado_atual = ESTADO.REJEICAO
+                        cadeia += caracter
+                    }
+                    break
+                case ESTADO.Q2:
+                    if(this.isNumero(caracter)) {
+                        estado_atual = ESTADO.Q2
+                        cadeia += caracter
+                    }else if(!this.isNumero(caracter)) {
+                        estado_atual = ESTADO.Q0
+                        pos-- // Back()
+                        this.setTabelaSimbolos(ListaTokens.ESTADO, cadeia, tot_linha, tot_coluna)
+                        cadeia = ""
+                    } else {
+                        estado_atual = ESTADO.REJEICAO
+                    }
+                    break
+                    case ESTADO.Q3: 
+                    estado_atual = ESTADO.Q0
+                    pos--
+                    this.setTabelaSimbolos(ListaTokens.PONTOVIRGULA, cadeia, tot_linha, tot_coluna)
+                    tot_coluna++
+                    cadeia = ""
+                    break
+                case ESTADO.Q4:
+                    estado_atual = ESTADO.Q0
+                    pos--
+                    this.setTabelaSimbolos(ListaTokens.ALFABERTOFITA, cadeia, tot_linha, tot_coluna)
+                    cadeia= ""
+                    break
+                case ESTADO.Q5:
+                    estado_atual = ESTADO.Q0
+                    pos--
+                    this.setTabelaSimbolos(ListaTokens.MOVIMENTO, cadeia, tot_linha, tot_coluna)
+                    cadeia = ""
+                    break
+                case ESTADO.Q6:
+                    estado_atual = ESTADO.Q6
+                    pos--
+                    this.setTabelaSimbolos(ListaTokens.FINAL, cadeia, tot_linha, tot_coluna)
+                    cadeia = ""
+                    break
+                case ESTADO.REJEICAO:
+                    if( caracter != 'Q' && 
+                        caracter != 'q' && 
+                        !this.isNumero(caracter) && 
+                        !this.isAlfabertoFita(caracter) && 
+                        !this.isIguinorarCaracter(caracter) &&
+                        !this.isMovimentador(caracter) &&
+                        !this.isQuebraLinha(caracter)
+                    ) {
+                        estado_atual = ESTADO.REJEICAO
+                        cadeia += caracter
+                    } else {
+                        estado_atual = ESTADO.Q0
+                        pos--
+                        this.setErros(`A cadeia ${cadeia} não foi reconhecida!`, tot_linha, tot_coluna)
+                        cadeia = ""
+                    }
+                
+            }
+
+            pos++;
+        }
+    }
+
+    setErros(mensage, linha, coluna) {
+        this.errorList.push({
+            mensage: `<span class='erro-code'>${mensage}</span>`,
+            linha,
+            coluna
+        })
+    }
+
+    setTabelaSimbolos(token, valor, linha, coluna) {
+        this.tabelaSimbolos.push({
+            token,
+            valor,
+            linha,
+            coluna
+        })
+    }
+
+    isAlfabertoFita(carater) {
+        return  this.isNumero(carater) ||
+                carater >= 'a' && carater <= 'p' ||
+                carater >= 'r' && carater <= 'z' ||
+                carater >= 'A' && carater <= 'K' ||
+                carater >= 'M' && carater <= 'O' ||
+                carater >= 'S' && carater <= 'Z' ||
+                carater == SimbolosEspeciais.branco_fita.simbolo1 ||
+                carater == SimbolosEspeciais.branco_fita.simbolo2 ||
+                carater == SimbolosEspeciais.delimitador.simbolo1 ||
+                carater == SimbolosEspeciais.delimitador.simbolo2 ||
+                carater == '+' ||
+                carater == '-' ||
+                carater == '*' ||
+                carater == '/'
+    }
+
+    isMovimentador(caracter) {
+        return caracter == 'P' || caracter == 'R' || caracter == 'L'
+    }
+
+    isQuebraLinha(caracter) {
+        return caracter == '\n'
+    }
+
+    isIguinorarCaracter(caracter) {
+        return caracter == '\s' || caracter == '\r' || caracter == '\b' || caracter == ' '
+    }
+
+    isNumero(caracter) {
+        return caracter >= '0' && caracter <= '9'
+    }
+
+}
+
 class Linguagem {
     constructor(el_tbody, obj_nontuplas) {
         const escopo = this
@@ -588,6 +811,8 @@ class Linguagem {
         // Parte que será mostrada no console
         this.el_cli = document.querySelector(".cmd-line-display")
 
+
+        this.string_lang = ""
         // FASE DO ANALISADOR
         this.comandosExecutar = []
         this.lookahead = 0
@@ -672,56 +897,63 @@ class Linguagem {
             let totColuna = 1
             for(let coluna of linha.querySelectorAll("td:not(.cmd-linha)")) {
 
-                // Analisando se as lexema estão válido.
-                this.analisadorLexico(coluna.innerText.trim(), totLinha, totColuna)
-
-                // Salvando o código, pode esta salvando código inválido, não há implementação da geração de código intermediario, será feita mais adiante
-                let stmt = this.gerarComandos(coluna.innerText.trim(), totLinha, totColuna)
-                if(stmt != undefined) {
-                    elementos.push(stmt)
+                // Gerando sequência de strings para transformar em linguagem
+                if(coluna.innerText.trim() != "") {
+                    this.string_lang += `${coluna.innerText.trim()}, `
+                
+                    // Salvando o código, pode esta salvando código inválido, não há implementação da geração de código intermediario, será feita mais adiante
+                    let stmt = this.gerarComandos(coluna.innerText.trim(), totLinha, totColuna)
+                    if(stmt != undefined) {
+                        elementos.push(stmt)
+                    }
                 }
+
                 totColuna++
             }
+
+            this.string_lang += "\n"
             
             this.comandosExecutar.push(elementos)
             
             totLinha++
         }
         
-        const el_erros_list = this.el_cli.querySelector("ul")
-        el_erros_list.innerHTML = ""
+        // const el_erros_list = this.el_cli.querySelector("ul")
+        // el_erros_list.innerHTML = ""
         
-        // Analise sintatica
-        if(this.totErroLexico == 0 && this.listStmts.length >= 0) {
-            this.programa()
+        // // Analise sintatica
+        // if(this.totErroLexico == 0 && this.listStmts.length >= 0) {
+        //     this.programa()
 
-            if(this.totErroSintatico > 0) {
-                this.el_cli.style.display = 'block'
-                abrirFecharConsole(true)
+        //     if(this.totErroSintatico > 0) {
+        //         this.el_cli.style.display = 'block'
+        //         abrirFecharConsole(true)
                 
-                for(let i = 0; i < this.erroListSintatico.length; i++) {
-                    let li = criarElemento("li")
-                    li.innerHTML = `(linha ${this.erroListSintatico[i].linha}, coluna ${this.erroListSintatico[i].coluna})${this.erroListSintatico[i].mensagem}`
+        //         for(let i = 0; i < this.erroListSintatico.length; i++) {
+        //             let li = criarElemento("li")
+        //             li.innerHTML = `(linha ${this.erroListSintatico[i].linha}, coluna ${this.erroListSintatico[i].coluna})${this.erroListSintatico[i].mensagem}`
 
-                    adicionarElemento(el_erros_list, li)
-                }   
+        //             adicionarElemento(el_erros_list, li)
+        //         }   
                 
-            } else {
-                this.el_cli.style.display = 'none'
-            }
-        } else {
-            this.el_cli.style.display = 'block'
-            abrirFecharConsole(true)
+        //     } else {
+        //         this.el_cli.style.display = 'none'
+        //     }
+        // } else {
+        //     this.el_cli.style.display = 'block'
+        //     abrirFecharConsole(true)
 
-            for(let i = 0; i < this.erroListLexico.length; i++) {
-                let li = criarElemento("li")
-                li.innerHTML = `(linha ${this.erroListLexico[i].linha}, coluna ${this.erroListLexico[i].coluna})${this.erroListLexico[i].mensagem}`
+        //     for(let i = 0; i < this.erroListLexico.length; i++) {
+        //         let li = criarElemento("li")
+        //         li.innerHTML = `(linha ${this.erroListLexico[i].linha}, coluna ${this.erroListLexico[i].coluna})${this.erroListLexico[i].mensagem}`
 
-                adicionarElemento(el_erros_list, li)
-            }     
-        }
+        //         adicionarElemento(el_erros_list, li)
+        //     }     
+        // }
 
-        setTotErro(this.totErroLexico + this.totErroSintatico)
+        // setTotErro(this.totErroLexico + this.totErroSintatico)
+
+        const t = new AnalisadorLexico()
     }
 
     gerarComandos(valor = "", linha, coluna) {
@@ -911,37 +1143,49 @@ class Linguagem {
         this.totColunaLida = 0
         const stmt = this.listStmts[this.lookahead]
         if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
-            this.totColunaLida++
             this.estado()
-
-            this.totColunaLida++
-            this.estado()
-            this.alfabertoFita()
-            this.movimento()
-
             this.comando()
-            this.programa()
+            this.stmt()
+        } else {
+            this.erroSintatico(`<span class='erro-code'>Esperava um estado APONTADOR válido`, stmt)
+            this.reconhecer()
+        }
+
+    }
+
+    stmt() {
+        const stmt = this.listStmts[this.lookahead]
+        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
+            this.estado()
+            this.stmtResto()
+        }
+
+    }
+
+    stmtResto() {
+        const stmt = this.listStmts[this.lookahead]
+        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
+            //this.estado()
+            this.comando()
+            this.stmtResto()
         }
     }
 
     comando() {
         const stmt = this.listStmts[this.lookahead];
-        const follow = this.listStmts[this.lookahead + 1]
-
-        if(stmt == undefined && follow == undefined) return
-
-        if(this.lookahead < this.listStmts.length && stmt.token == this.TOKENS.ESTADO && follow != undefined && follow.token == this.TOKENS.ALFABERTOFITA) {
+    
+        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
             this.totColunaLida++
             this.estado()
             this.alfabertoFita()
             this.movimento()
 
-            this.comando()
-        } else if(stmt.token == this.TOKENS.ESTADO && follow.token == this.TOKENS.ESTADO) {
-          this.programa()  
+            // this.comando()
         } else {
             this.erroSintatico(`<span class='erro-code'>Esperava um estado válido`, stmt)
+            this.reconhecer()
         }
+
     }
 
     estado() {
@@ -961,10 +1205,10 @@ class Linguagem {
                 this.comando()
             } else {
                 this.erroSintatico(`<span class='erro-code'>Esperava um estado</span>`, stmt)
+                this.reconhecer()
             }
         }
         
-        this.reconhecer()
     }
    
     alfabertoFita() {

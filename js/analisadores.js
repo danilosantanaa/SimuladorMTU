@@ -590,13 +590,14 @@ class AnalisadorLexico {
         this.string_lang = ""
         
         /**
-         * Guardará uma sequência de token no formato [token_id, valor, número da linha]
+         * Guardará uma sequência de token no formato [token, valor, linha, coluna]
          */
         this.tabelaSimbolos = []
-        this.errorList = []
 
-        this.lerTabela()
-        this.gerarTokens()
+        /**
+         * Guardará os erros de reconhecimentos de lexemas [mensage, linha, coluna]
+         */
+        this.errorList = []
     }
 
 
@@ -747,9 +748,9 @@ class AnalisadorLexico {
         }
     }
 
-    setErros(mensage, linha, coluna) {
+    setErros(mensagem, linha, coluna) {
         this.errorList.push({
-            mensage: `<span class='erro-code'>${mensage}</span>`,
+            mensagem: `<span class='erro-code'>${mensagem}</span>`,
             linha,
             coluna
         })
@@ -797,6 +798,99 @@ class AnalisadorLexico {
         return caracter >= '0' && caracter <= '9'
     }
 
+}
+
+class AnalisadorSintatico {
+    constructor() {
+        this.analisadorLexico = new AnalisadorLexico()
+        this.lookahead = 0
+        this.errosSintaticos = []
+
+        this.analisadorLexico.lerTabela()
+        this.analisadorLexico.gerarTokens()
+
+        if(this.analisadorLexico.errorList.length == 0) {
+            this.programa()
+        }
+    }
+
+    programa() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token == ListaTokens.ESTADO) {
+            this.estado()
+            this.pontoVirgula()
+            this.comando()
+            this.programa()
+        }
+    }
+    
+    pontoVirgula() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token != ListaTokens.PONTOVIRGULA) {
+            this.setErros(`Overflow de comando, não pode haver "${stmt.valor}. Corrija e tente novamente."`, stmt.linha, stmt.coluna)
+        }
+
+        this.proximoToken()
+    }
+
+    comando() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token == ListaTokens.ESTADO) {
+            this.estado()
+            this.alfabertoFita()
+            this.movimento()
+            this.pontoVirgula()
+            this.comando()
+        } else if(stmt.token == ListaTokens.PONTOVIRGULA) {
+            this.pontoVirgula()
+            this.comando()
+        }
+    }
+
+    estado() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token != ListaTokens.ESTADO) {
+            this.setErros(`Esperava um ESTADO, e não um "${stmt.valor}. Para ser um estado válido, os estados deve ser de q0, q1, q2, ... qN."`, stmt.linha, stmt.coluna)
+        }
+
+        this.proximoToken()
+    }
+
+    alfabertoFita() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token != ListaTokens.ALFABERTOFITA) {
+            this.setErros(`Esperava um ALFABERTO DE FITA e não um "${stmt.valor}"`, stmt.linha, stmt.coluna)
+        }
+
+        this.proximoToken()
+    }
+
+    movimento() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead] 
+
+        if(stmt.token != ListaTokens.MOVIMENTO) {
+            this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor}". Os movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
+        }
+
+        this.proximoToken()
+    }
+
+    proximoToken() {
+        this.lookahead++
+    }
+
+    setErros(msg, linha, coluna) {
+        this.errosSintaticos.push({
+            mensagem: `<span class='erro'>${msg}</span>`,
+            linha,
+            coluna
+        })
+    }
 }
 
 class Linguagem {
@@ -953,7 +1047,7 @@ class Linguagem {
 
         // setTotErro(this.totErroLexico + this.totErroSintatico)
 
-        const t = new AnalisadorLexico()
+        const t = new AnalisadorSintatico()
     }
 
     gerarComandos(valor = "", linha, coluna) {

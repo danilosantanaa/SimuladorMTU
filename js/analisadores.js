@@ -1,5 +1,5 @@
 import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais } from "./ManipularDOM.js"
-import { abrirFecharConsole, setTotErro, setTotAvisos} from "./console.js"
+import { abrirFecharConsole, setTotErro, setTotAvisos, setConsoleLogs} from "./console.js"
 /**
  *
  * Tabela de simbolos
@@ -581,7 +581,7 @@ const ListaTokens = {
     ALFABERTOFITA: 200,
     MOVIMENTO: 300,
     PONTOVIRGULA: 400,
-    FINAL: 500
+    DELIMITADOR_APONTADOR: 500
 }
 
 class AnalisadorLexico {
@@ -611,13 +611,16 @@ class AnalisadorLexico {
 
             // lendos as colunas
             for(let j = 0; j < table_data.length; j++) {
+
+                if(j == 0) {
+                    this.string_lang += '$'
+                }
+
                 this.string_lang += `${table_data[j].innerText.trim()}; `
             }
 
-            this.string_lang += "\n"
+            this.string_lang += "\n "
         }
-
-        this.string_lang += "$"; //  Simboliza o fim da string
     }
 
     /**
@@ -719,9 +722,9 @@ class AnalisadorLexico {
                     cadeia = ""
                     break
                 case ESTADO.Q6:
-                    estado_atual = ESTADO.Q6
+                    estado_atual = ESTADO.Q0
                     pos--
-                    this.setTabelaSimbolos(ListaTokens.FINAL, cadeia, tot_linha, tot_coluna)
+                    this.setTabelaSimbolos(ListaTokens.DELIMITADOR_APONTADOR, cadeia, tot_linha, tot_coluna)
                     cadeia = ""
                     break
                 case ESTADO.REJEICAO:
@@ -801,10 +804,13 @@ class AnalisadorLexico {
 }
 
 class AnalisadorSintatico {
-    constructor() {
+    constructor(obj_nontuplas) {
         this.analisadorLexico = new AnalisadorLexico()
+        this.obj_nontuplas = obj_nontuplas
+
         this.lookahead = 0
         this.errosSintaticos = []
+        this.avisosSintaticos = []
 
         this.analisadorLexico.lerTabela()
         this.analisadorLexico.gerarTokens()
@@ -817,19 +823,34 @@ class AnalisadorSintatico {
     programa() {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
-        if(stmt.token == ListaTokens.ESTADO) {
+        if(stmt == undefined) return
+
+        if(stmt.token == ListaTokens.DELIMITADOR_APONTADOR) {
+            this.delimitadorApontador()
             this.estado()
             this.pontoVirgula()
             this.comando()
             this.programa()
         }
     }
+
+    delimitadorApontador() {
+        const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
+
+        if(stmt.token != ListaTokens.DELIMITADOR_APONTADOR) {
+            this.setErros(`Deve haver um operador no código-fonte que simboliza estado apontador"`, stmt.linha, stmt.coluna)
+        } else {
+
+        }
+
+        this.proximoToken()
+    }
     
-    pontoVirgula() {
+    pontoVirgula(apontador = true) {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
         if(stmt.token != ListaTokens.PONTOVIRGULA) {
-            this.setErros(`Overflow de comando, não pode haver "${stmt.valor}. Corrija e tente novamente."`, stmt.linha, stmt.coluna)
+            this.setErros(`${apontador ? "Deve haver somente único ESTADO. Deve ser q0 até qN, tal que qN pertença ao conjuntos de estados." : "Deve haver ESTADO ALFABERTO DE FITA MOVIMENTADOR: Exemplo: qN A M, esses elementos deve pertence ao conjuntos informado na nontuplas."}`, stmt.linha, stmt.coluna)
         }
 
         this.proximoToken()
@@ -838,14 +859,16 @@ class AnalisadorSintatico {
     comando() {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
-        if(stmt.token == ListaTokens.ESTADO) {
+        if(stmt == undefined) return;
+    
+        if(stmt.token == ListaTokens.ESTADO ) {
             this.estado()
             this.alfabertoFita()
             this.movimento()
-            this.pontoVirgula()
+            this.pontoVirgula(false)
             this.comando()
         } else if(stmt.token == ListaTokens.PONTOVIRGULA) {
-            this.pontoVirgula()
+            this.pontoVirgula(false)
             this.comando()
         }
     }
@@ -854,7 +877,11 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
         if(stmt.token != ListaTokens.ESTADO) {
-            this.setErros(`Esperava um ESTADO, e não um "${stmt.valor}. Para ser um estado válido, os estados deve ser de q0, q1, q2, ... qN."`, stmt.linha, stmt.coluna)
+            this.setErros(`Esperava um ESTADO, e não um "${stmt.valor}. Para ser um estado válido, os estados deve ser de q0, q1, q2, ... qN.`, stmt.linha, stmt.coluna)
+        } else if(stmt != null) {
+           if(!this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)) {
+                this.setAvisos(`O Estado "${stmt.valor}" não pertence ao conjuntos de estados informado na nontuplas.`, stmt.linha, stmt.coluna)
+           } 
         }
 
         this.proximoToken()
@@ -865,6 +892,10 @@ class AnalisadorSintatico {
 
         if(stmt.token != ListaTokens.ALFABERTOFITA) {
             this.setErros(`Esperava um ALFABERTO DE FITA e não um "${stmt.valor}"`, stmt.linha, stmt.coluna)
+        } else if(stmt != null) {
+            if(!this.obj_nontuplas.alfaberto_fita.some(alfaberto_fita => alfaberto_fita == stmt.valor)) {
+                this.setAvisos(`O Alfaberto de fita "${stmt.valor}" não pertence ao conjuntos de alfaberto de fita informada na nontuplas.`, stmt.linha, stmt.coluna)
+           } 
         }
 
         this.proximoToken()
@@ -874,7 +905,7 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead] 
 
         if(stmt.token != ListaTokens.MOVIMENTO) {
-            this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor}". Os movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
+            this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor}". O movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
         }
 
         this.proximoToken()
@@ -886,11 +917,20 @@ class AnalisadorSintatico {
 
     setErros(msg, linha, coluna) {
         this.errosSintaticos.push({
-            mensagem: `<span class='erro'>${msg}</span>`,
+            mensagem: `<span class='erro-code'>${msg}</span>`,
             linha,
             coluna
         })
     }
+
+    setAvisos(msg, linha, coluna) {
+        this.avisosSintaticos.push({
+            mensagem: `<span class='aviso-code'>${msg}</span>`,
+            linha,
+            coluna
+        })
+    }
+
 }
 
 class Linguagem {
@@ -901,6 +941,9 @@ class Linguagem {
         this.el_tbody = el_tbody
         this.obj_nontuplas = obj_nontuplas
         this.ponteiro = document.querySelector("#cabecote")
+
+        this.analisadorSintatico = new AnalisadorSintatico(obj_nontuplas)
+        this.is_executar = true
 
         // Parte que será mostrada no console
         this.el_cli = document.querySelector(".cmd-line-display")
@@ -1011,43 +1054,29 @@ class Linguagem {
             
             totLinha++
         }
-        
-        // const el_erros_list = this.el_cli.querySelector("ul")
-        // el_erros_list.innerHTML = ""
-        
-        // // Analise sintatica
-        // if(this.totErroLexico == 0 && this.listStmts.length >= 0) {
-        //     this.programa()
 
-        //     if(this.totErroSintatico > 0) {
-        //         this.el_cli.style.display = 'block'
-        //         abrirFecharConsole(true)
-                
-        //         for(let i = 0; i < this.erroListSintatico.length; i++) {
-        //             let li = criarElemento("li")
-        //             li.innerHTML = `(linha ${this.erroListSintatico[i].linha}, coluna ${this.erroListSintatico[i].coluna})${this.erroListSintatico[i].mensagem}`
+        setTotErro(0)
+        setTotAvisos(0)
+        this.is_executar = true
+        if(this.analisadorSintatico.analisadorLexico.errorList.length > 0) {
+            setTotErro(this.analisadorSintatico.analisadorLexico.errorList.length)
+            abrirFecharConsole(true)
+            this.is_executar = false
+        } 
 
-        //             adicionarElemento(el_erros_list, li)
-        //         }   
-                
-        //     } else {
-        //         this.el_cli.style.display = 'none'
-        //     }
-        // } else {
-        //     this.el_cli.style.display = 'block'
-        //     abrirFecharConsole(true)
+        if(this.analisadorSintatico.errosSintaticos.length > 0) {
+            setTotErro(this.analisadorSintatico.errosSintaticos.length)
+            abrirFecharConsole(true)
+            this.is_executar = false
+        }
 
-        //     for(let i = 0; i < this.erroListLexico.length; i++) {
-        //         let li = criarElemento("li")
-        //         li.innerHTML = `(linha ${this.erroListLexico[i].linha}, coluna ${this.erroListLexico[i].coluna})${this.erroListLexico[i].mensagem}`
+        if(this.analisadorSintatico.avisosSintaticos.length > 0) {
+            setTotAvisos(this.analisadorSintatico.avisosSintaticos.length)
+            abrirFecharConsole(true)
+            this.is_executar = false
+        }
 
-        //         adicionarElemento(el_erros_list, li)
-        //     }     
-        // }
-
-        // setTotErro(this.totErroLexico + this.totErroSintatico)
-
-        const t = new AnalisadorSintatico()
+        setConsoleLogs(this.analisadorSintatico.analisadorLexico.errorList, this.analisadorSintatico.errosSintaticos, this.analisadorSintatico.avisosSintaticos)
     }
 
     gerarComandos(valor = "", linha, coluna) {
@@ -1086,262 +1115,6 @@ class Linguagem {
         return stmt
     }
 
-    analisadorLexico(lexema, linha, coluna) {
-        let estado = 1;
-        let cadeia = ""
-        let resto_cadeia = ""
-
-        let poscaracterlido = 0
-        lexema += " " // Espaço que será uma frag para indicar final de comando
-        while(poscaracterlido < lexema.length) {
-            let caracter = lexema[poscaracterlido]
-
-            switch(estado) {
-                case 1:
-                    cadeia += caracter
-                    if(caracter == 'q' || caracter == 'Q') {
-                        estado = 2
-                    } else if (caracter >= 'a' && caracter <= 'p' || 
-                               caracter >= 'r' && caracter <= 'z' || 
-                               caracter >= 'A' && caracter <= 'K' || 
-                               caracter >= 'M' && caracter <= 'O' || 
-                               caracter >= 'S' && caracter <= 'Z' || 
-                               caracter == '-' || caracter == '+' || 
-                               caracter == '*' || caracter == '/' || 
-                               caracter >= 0 && caracter <= 9 ||
-                               caracter == SimbolosEspeciais.branco_fita.simbolo1 ||
-                               caracter == SimbolosEspeciais.branco_fita.simbolo2 || 
-                               caracter == SimbolosEspeciais.delimitador.simbolo1 ||
-                               caracter == SimbolosEspeciais.delimitador.simbolo2
-                    ) {
-                        estado = 5
-                    } else if(caracter == 'R' || caracter == 'P' || caracter == 'L') {
-                        estado = 8
-                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                        estado = 1
-                    }
-                    break;
-                case 2:
-                    cadeia += caracter
-                    if(caracter >= '0' && caracter <= '9') {
-                        estado = 3
-                    } else if(caracter != ' '){
-                        estado = 3
-                    } else {
-                        resto_cadeia = caracter
-                        estado = 4
-                    }
-                    break;
-                case 3:
-                    cadeia += caracter
-                    if(caracter >= '0' && caracter <= '9') {
-                        estado = 3
-                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                        estado = 1
-                        this.listStmts.push({
-                            token: this.TOKENS.ESTADO,
-                            valor: cadeia.trim(),
-                            linha,
-                            coluna
-                        })
-
-                        cadeia = ""
-                    } else {
-                        resto_cadeia = caracter
-                        estado = 4
-                    }
-                    break;
-                case 4: // caracteres invalido
-                    cadeia += caracter
-
-                    if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
-                        estado = 4
-                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r'){
-                        this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um ESTADO válido.`, linha, coluna)
-                        cadeia = ""
-                        estado = 1
-                    }
-                    break
-                case 5:
-                    cadeia += caracter
-                    if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                        estado = 1
-                        this.listStmts.push({
-                            token: this.TOKENS.ALFABERTOFITA,
-                            valor: cadeia.trim(),
-                            linha,
-                            coluna
-                        })
-
-                        cadeia = ""
-                    } else {
-                        resto_cadeia = cadeia
-                        estado = 6
-                    }
-                    break;
-                case 6: // estado validador 
-                    cadeia += caracter
-                    if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
-                        estado = 6
-                    } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                        this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um ALFABERTO DE FITA válido.`, linha, coluna)
-                        estado = 1
-                        cadeia = ""
-                    }
-                    break;
-                case 8:
-                    cadeia += caracter
-                    if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                        estado = 1
-                        this.listStmts.push({
-                            token: this.TOKENS.MOVIMENTO,
-                            valor: cadeia.trim(),
-                            linha,
-                            coluna
-                        })
-
-                        cadeia = ""
-                        estado = 1
-                    } else {
-                        resto_cadeia = caracter
-                        estado = 7
-                    }
-                        break
-                    case 7:
-                        cadeia += caracter
-                        if(caracter != ' ' && caracter != '\n' && caracter != '\t' && caracter != '\r') {
-                            estado = 7
-                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || caracter == '\r') {
-                            this.erroLexico(`O lexema <strong>"${cadeia.trim()}"</strong> não foi reconhecido como um MOVIMENTO DE FITA válido.`, linha, coluna)
-                            cadeia = ""
-                            estado = 1
-                        }
-                        break;
-            }
-
-            poscaracterlido++
-        }
-    }
-
-    erroLexico(msg, linha, coluna) {
-        this.erroListLexico.push({
-            mensagem: msg,
-            linha,
-            coluna
-        })
-
-        this.totErroLexico++
-    }
-
-    programa() {
-        this.totColunaLida = 0
-        const stmt = this.listStmts[this.lookahead]
-        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
-            this.estado()
-            this.comando()
-            this.stmt()
-        } else {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado APONTADOR válido`, stmt)
-            this.reconhecer()
-        }
-
-    }
-
-    stmt() {
-        const stmt = this.listStmts[this.lookahead]
-        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
-            this.estado()
-            this.stmtResto()
-        }
-
-    }
-
-    stmtResto() {
-        const stmt = this.listStmts[this.lookahead]
-        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
-            //this.estado()
-            this.comando()
-            this.stmtResto()
-        }
-    }
-
-    comando() {
-        const stmt = this.listStmts[this.lookahead];
-    
-        if(stmt != undefined && stmt.token == this.TOKENS.ESTADO) {
-            this.totColunaLida++
-            this.estado()
-            this.alfabertoFita()
-            this.movimento()
-
-            // this.comando()
-        } else {
-            this.erroSintatico(`<span class='erro-code'>Esperava um estado válido`, stmt)
-            this.reconhecer()
-        }
-
-    }
-
-    estado() {
-        const stmt = this.listStmts[this.lookahead]
-        if(stmt.token == this.TOKENS.ESTADO) {
-        
-            // Verifica se o estado apontador pertence ao conjunto de estados
-            const valido = this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)
-
-            if(!valido) {
-                this.erroSintatico(`<span class='erro-code'>O estado "${stmt.valor}" não pertence ao conjunto de estados na nontuplas!</span>`, stmt)
-            }
-
-        } else if(stmt != undefined) {
-            if(this.totColunaLida == 2) {
-                this.erroSintatico(`<span class='erro-code'>O Estado apontador inválido! Somente um estado pode está nessa célula.</span>`, stmt)
-                this.comando()
-            } else {
-                this.erroSintatico(`<span class='erro-code'>Esperava um estado</span>`, stmt)
-                this.reconhecer()
-            }
-        }
-        
-    }
-   
-    alfabertoFita() {
-        const stmt = this.listStmts[this.lookahead]
-        
-        if(stmt.token == this.TOKENS.ALFABERTOFITA) {
-
-            // Verifica se o alfaberto de fita informado, pertence ao conjunto do alfaberto da fita informada na nontupla
-            const valido = this.obj_nontuplas.alfaberto_fita.some(alfaberto_fita => alfaberto_fita == stmt.valor)
-
-            if(!valido) {
-                this.erroSintatico(`<span class='erro-code'>O alfaberto de fita "${stmt.valor}" não pertence ao conjunto do alfaberto de fita informado na nontupla!</span>`, stmt)
-            }
-
-        } else if(stmt != undefined) {
-            this.erroSintatico("<span class='erro-code'>Esperava um alfaberto de fita válido.</span>", stmt)
-        }
-
-        this.reconhecer()
-    }
-
-    movimento() {
-        const stmt = this.listStmts[this.lookahead]
-        if(this.listStmts[this.lookahead].token != this.TOKENS.MOVIMENTO) {
-            this.erroSintatico("<span class='erro-code'>Esperava um movimentador. Sendo ou L ou P ou R</span>", stmt)
-           
-        } 
-        this.reconhecer()
-    }
-
-    reconhecer() {
-        this.lookahead++
-    }
-
-    erroSintatico(mensagem, stmt) {
-        this.totErroSintatico++
-        this.erroListSintatico.push({ mensagem, linha: stmt.linha, coluna: stmt.coluna })
-    }
-
     mostrarBarraRolagem() {
         if(this.el_fita.classList.contains("rolagem")) {
             this.el_fita.classList.remove("rolagem")
@@ -1370,7 +1143,7 @@ class Linguagem {
         el_estado_display.innerText = estado_atual
 
         const POS_INVALIDA = -1
-        if(this.comandosExecutar.length > 0 && this.totErroLexico == 0 && this.totErroSintatico == 0) {
+        if(this.comandosExecutar.length > 0 && this.is_executar) {
             let contador = 0;
             while( contador < this.el_entrada.length && contador >= 0 && !this.is_stop) {
                 // Ler a cedula da fita

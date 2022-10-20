@@ -29,6 +29,10 @@
     color: red;
 }
 
+.aviso-code {
+    color: yellow;
+}
+
 td[estado-apontador] {
     color: blue;
 }

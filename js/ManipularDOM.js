@@ -42,8 +42,6 @@ function trocarValores(el, valor) {
     el.innerText = el.innerText.replace(">", SimbolosEspeciais.delimitador.simbolo2)
 }
 
-
-
 export {
     criarElemento,
     adicionarElemento,

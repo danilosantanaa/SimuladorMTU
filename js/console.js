@@ -1,3 +1,5 @@
+import { criarElemento, adicionarElemento } from "./ManipularDOM.js"
+
 /** Responsavel por fazer a manipulação do console */
 const cmd =  document.querySelector(".cli-content")
 const btn_fechar_console = cmd.querySelector(".controles > .fechar-cmd")
@@ -5,6 +7,7 @@ const btn_abrir_console = cmd.querySelector(".controles > .abrir-cmd")
 const btn_erros = cmd.querySelector(".erros")
 const btn_avisos = cmd.querySelector(".avisos")
 const cli = cmd.querySelector(".cli")
+const el_ul_console = document.querySelector(".cmd-line-display ul")
 
 function abrirFecharConsole(abrir_automatico = false) {
 
@@ -38,11 +41,27 @@ function setTotErro(tot = 0) {
 }
 
 function setTotAvisos(tot = 0) {
-    document.querySelector(".info .erros .tot").innerHTML = `(${tot})`
+    document.querySelector(".info .avisos .tot").innerHTML = `(${tot})`
+}
+
+function setItemConsole(arry = []) {
+    for(let i = 0; i < arry.length; i++) {
+        const li = criarElemento("li")
+        li.innerHTML = `(${arry[i].linha}, ${arry[i].coluna}) - ${arry[i].mensagem}`
+        adicionarElemento(el_ul_console, li)
+    }
+}
+
+function setConsoleLogs(errosLexico = [], errosSintatico = [],  avisos = []) {
+    el_ul_console.innerHTML = ""
+    setItemConsole(errosLexico)
+    setItemConsole(errosSintatico)
+    setItemConsole(avisos)
 }
 
 export {
     abrirFecharConsole,
     setTotErro,
-    setTotAvisos
+    setTotAvisos,
+    setConsoleLogs
 }

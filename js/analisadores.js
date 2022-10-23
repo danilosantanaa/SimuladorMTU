@@ -581,7 +581,8 @@ const ListaTokens = {
     ALFABERTOFITA: 200,
     MOVIMENTO: 300,
     PONTOVIRGULA: 400,
-    DELIMITADOR_APONTADOR: 500
+    DELIMITADOR_APONTADOR: 500,
+    NOVA_LINHA: 600
 }
 
 class AnalisadorLexico {
@@ -648,6 +649,7 @@ class AnalisadorLexico {
             Q4: 4,
             Q5: 5,
             Q6: 6,
+            Q8: 8,
             REJEICAO: 7
         }
 
@@ -661,8 +663,10 @@ class AnalisadorLexico {
                         estado_atual = ESTADO.Q1
                         cadeia += caracter
                     } else if(this.isQuebraLinha(caracter)) {
+                        estado_atual = ESTADO.Q8;
                         tot_linha++
                         tot_coluna = 1
+                        cadeia += caracter
                     } else if(caracter == ';') {
                        estado_atual = ESTADO.Q3
                        cadeia += caracter
@@ -725,6 +729,12 @@ class AnalisadorLexico {
                     estado_atual = ESTADO.Q0
                     pos--
                     this.setTabelaSimbolos(ListaTokens.DELIMITADOR_APONTADOR, cadeia, tot_linha, tot_coluna)
+                    cadeia = ""
+                    break
+                case ESTADO.Q8:
+                    estado_atual = ESTADO.Q0
+                    pos--
+                    this.setTabelaSimbolos(ListaTokens.NOVA_LINHA, cadeia, tot_linha, tot_coluna)
                     cadeia = ""
                     break
                 case ESTADO.REJEICAO:
@@ -815,11 +825,18 @@ class AnalisadorSintatico {
         this.analisadorLexico.lerTabela()
         this.analisadorLexico.gerarTokens()
 
+        // Analisador sematico
+        this.analisadorSematico = new AnalisadorSemantico()
+
         if(this.analisadorLexico.errorList.length == 0) {
             this.programa()
+
+            this.verificarErrosMovimentadorParada()
+            this.verificarErrosEstadoInicial()
         }
     }
 
+    // Gramatica livre de contexto
     programa() {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
@@ -828,6 +845,12 @@ class AnalisadorSintatico {
         if(stmt.token == ListaTokens.DELIMITADOR_APONTADOR) {
             this.delimitadorApontador()
             this.estado()
+            if(!this.analisadorSematico.estado_apontador_declarado.has(this.analisadorSematico.estado)) {
+                this.analisadorSematico.estado_apontador_declarado.set(this.analisadorSematico.estado, ListaTokens.ESTADO)
+            } else {
+                this.setErros(`O ESTADO ${this.analisadorSematico.estado} já foi declarado.`, this.analisadorSematico.num_linha, this.analisadorSematico.num_coluna)
+            }
+
             this.pontoVirgula()
             this.comando()
             this.programa()
@@ -850,7 +873,7 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
         if(stmt.token != ListaTokens.PONTOVIRGULA) {
-            this.setErros(`${apontador ? "Deve haver somente único ESTADO. Deve ser q0 até qN, tal que qN pertença ao conjuntos de estados." : "Deve haver ESTADO ALFABERTO DE FITA MOVIMENTADOR: Exemplo: qN A M, esses elementos deve pertence ao conjuntos informado na nontuplas."}`, stmt.linha, stmt.coluna)
+            this.setErros(`${apontador ? "Deve haver somente único ESTADO. Deve ser q0 até qN, tal que qN pertença ao conjuntos de estados." : "Deve haver &lt;ESTADO&gt;&lt;ALFABERTO DE FITA&gt;&lt;MOVIMENTADOR&gt;: Exemplo de comando: \"qN A M\", esses elementos deve pertence ao conjuntos informado na nontuplas."}`, stmt.linha, stmt.coluna)
         }
 
         this.proximoToken()
@@ -865,11 +888,18 @@ class AnalisadorSintatico {
             this.estado()
             this.alfabertoFita()
             this.movimento()
+            this.analisadorSematico.setComandos()
+
             this.pontoVirgula(false)
             this.comando()
         } else if(stmt.token == ListaTokens.PONTOVIRGULA) {
             this.pontoVirgula(false)
             this.comando()
+        } else if(stmt.token == ListaTokens.NOVA_LINHA) {
+            this.proximoToken();
+            this.programa();
+        } else {
+            this.setErros(`Deve haver &lt;ESTADO&gt;&lt;ALFABERTO DE FITA&gt;&lt;MOVIMENTADOR&gt;: Exemplo de comando: \"qN A M\", esses elementos deve pertence ao conjuntos informado na nontuplas.`, stmt.linha, stmt.coluna)
         }
     }
 
@@ -884,6 +914,9 @@ class AnalisadorSintatico {
            } 
         }
 
+        // Será usada para fazer analise sematica
+        this.analisadorSematico.setEstado(stmt.valor, stmt.linha, stmt.coluna)
+
         this.proximoToken()
     }
 
@@ -893,11 +926,14 @@ class AnalisadorSintatico {
         if(stmt.token != ListaTokens.ALFABERTOFITA) {
             this.setErros(`Esperava um ALFABERTO DE FITA e não um "${stmt.valor}"`, stmt.linha, stmt.coluna)
         } else if(stmt != null) {
+
+            // Verificando se o alfaberto de fita pertence ao conjuntos de alfaberto declarada na nontuplas
             if(!this.obj_nontuplas.alfaberto_fita.some(alfaberto_fita => alfaberto_fita == stmt.valor)) {
                 this.setAvisos(`O Alfaberto de fita "${stmt.valor}" não pertence ao conjuntos de alfaberto de fita informada na nontuplas.`, stmt.linha, stmt.coluna)
            } 
         }
 
+        this.analisadorSematico.setAlfaberto(stmt.valor, stmt.linha, stmt.coluna)
         this.proximoToken()
     }
 
@@ -908,6 +944,11 @@ class AnalisadorSintatico {
             this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor}". O movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
         }
 
+        if(!this.isEstadoFinal) {
+           this.isEstadoFinal = Dicionario.MOVER.P == stmt && this.obj_nontuplas.estado_final.some(estado_final => estado_final == this.atributos.estado)
+        }
+
+        this.analisadorSematico.setMovimentador(stmt.valor, stmt.linha, stmt.coluna)
         this.proximoToken()
     }
 
@@ -928,6 +969,99 @@ class AnalisadorSintatico {
             mensagem: `<span class='aviso-code'>${msg}</span>`,
             linha,
             coluna
+        })
+    }
+
+
+    verificarErrosMovimentadorParada() {
+        const movimentador_parada = this.analisadorSematico.movimentadorList.filter(mov => mov.movimentador == Dicionario.MOVER.P)
+
+        if(movimentador_parada.length == 0) {
+            this.setAvisos(`Foi detectado possível loop infinito, por favor verifique seu código e certifique de colocar o movimentador "${Dicionario.MOVER.P}".`, 0, 0)
+        } 
+
+        if(movimentador_parada.length > 1) {
+           this.setAvisos(`Existe duplicidade de comando de parada! Só pode haver somente um único comando movimentador "${Dicionario.MOVER.P}".`, 0, 0)
+        }
+    }
+
+    verificarErrosEstadoInicial() {
+        const estado_inicial = this.analisadorSematico.comandosList.filter(cmd => cmd.estado == this.obj_nontuplas.estado_inicial.join(' ').trim() && 
+                                                                                  (cmd.alfaberto_fita == SimbolosEspeciais.delimitador.simbolo1 ||  cmd.alfaberto_fita == SimbolosEspeciais.delimitador.simbolo2) &&
+                                                                                  cmd.movimentador == Dicionario.MOVER.R)
+
+        // Verifica se o estado de partida está na coluna do delimitador de fita
+        let posDelimitadorColuna = this.obj_nontuplas.alfaberto_fita.indexOf(SimbolosEspeciais.delimitador.simbolo1) + 2
+        // Verifica se há algum comando de partida informada
+        if(estado_inicial.length == 0) {
+            this.setAvisos(`Não foi entrado o estado de partida. O estado inicial deve está no formato "${this.obj_nontuplas.estado_inicial.join('')} ${SimbolosEspeciais.delimitador.simbolo1} ${Dicionario.MOVER.R}".`, 1, posDelimitadorColuna)
+            return
+        }
+
+
+        if(estado_inicial[0].coluna != posDelimitadorColuna) {
+            this.setAvisos(`Não foi encontrado o estado inicial na coluna do delimitador na linha 1 e coluna ${posDelimitadorColuna}.`, 0, 0)
+        }
+
+    }
+
+    verificarErrosEstadoFinal() {
+        
+    }
+
+}
+
+class AnalisadorSemantico {
+    constructor() {
+        this.estado = null
+        this.alfaberto_fita = null
+        this.movimentador = null
+
+        this.num_linha = 0
+        this.num_coluna = 0
+
+        this.estado_apontador_declarado = new Map()
+        this.estado_inicial_declarado = new Map()
+        this.estado_final_declarado = new Map()
+        
+        this.comandosList = []
+        this.movimentadorList = []
+    }
+
+    setEstado(estado, linha, coluna) {
+        this.estado = estado
+        this.num_linha = linha
+        this.num_coluna = coluna
+    }
+
+    setAlfaberto(alfaberto_fita, linha, coluna) {
+        this.alfaberto_fita = alfaberto_fita
+        this.num_linha = linha
+        this.num_coluna = coluna
+    }
+
+    setMovimentador(movimentador, linha, coluna) {
+        this.movimentador = movimentador
+        this.num_linha = linha
+        this.num_coluna = coluna
+        this.setMovimentadorList()
+    }
+
+    setComandos() {
+        this.comandosList.push({
+            estado: this.estado,
+            alfaberto_fita: this.alfaberto_fita,
+            movimentador: this.movimentador,
+            linha: this.num_linha,
+            coluna: this.num_coluna
+        })
+    }
+
+    setMovimentadorList() {
+        this.movimentadorList.push({
+            movimentador: this.movimentador,
+            linha: this.num_linha,
+            coluna: this.num_coluna
         })
     }
 

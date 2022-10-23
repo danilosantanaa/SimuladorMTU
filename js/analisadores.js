@@ -335,7 +335,7 @@ class Nontupla {
     }
 
     get estado_nao_final() {
-        return this.estado_nao_final
+        return this._estado_nao_final
     }
 
     get alfaberto_fita() {
@@ -831,6 +831,7 @@ class AnalisadorSintatico {
         if(this.analisadorLexico.errorList.length == 0) {
             this.programa()
 
+            this.verificarDeclaracaoTodosEstados()
             this.verificarErrosMovimentadorParada()
             this.verificarErrosEstadoInicial()
         }
@@ -846,9 +847,13 @@ class AnalisadorSintatico {
             this.delimitadorApontador()
             this.estado()
             if(!this.analisadorSematico.estado_apontador_declarado.has(this.analisadorSematico.estado)) {
-                this.analisadorSematico.estado_apontador_declarado.set(this.analisadorSematico.estado, ListaTokens.ESTADO)
+                if(this.obj_nontuplas.estado_final.some(estado_final => estado_final == this.analisadorSematico.estado)) {
+                    this.setAvisos(`O Estado "${this.analisadorSematico.estado}" não pode ser declarado. Estado final não precisa ser declarado na primeira coluna.`)
+                } else {
+                    this.analisadorSematico.estado_apontador_declarado.set(this.analisadorSematico.estado, ListaTokens.ESTADO)
+                }
             } else {
-                this.setErros(`O ESTADO ${this.analisadorSematico.estado} já foi declarado.`, this.analisadorSematico.num_linha, this.analisadorSematico.num_coluna)
+                this.setErros(`O ESTADO "${this.analisadorSematico.estado}" já foi declarado.`, this.analisadorSematico.num_linha, this.analisadorSematico.num_coluna)
             }
 
             this.pontoVirgula()
@@ -907,7 +912,7 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
         if(stmt.token != ListaTokens.ESTADO) {
-            this.setErros(`Esperava um ESTADO, e não um "${stmt.valor}. Para ser um estado válido, os estados deve ser de q0, q1, q2, ... qN.`, stmt.linha, stmt.coluna)
+            this.setErros(`Esperava um ESTADO, e não um "${stmt.valor != ";"? stmt.valor : "" }". Para ser um estado válido, os estados deve ser de q0, q1, q2, ... qN.`, stmt.linha, stmt.coluna)
         } else if(stmt != null) {
            if(!this.obj_nontuplas.conjunto_estado.some(estado => estado == stmt.valor)) {
                 this.setAvisos(`O Estado "${stmt.valor}" não pertence ao conjuntos de estados informado na nontuplas.`, stmt.linha, stmt.coluna)
@@ -959,16 +964,16 @@ class AnalisadorSintatico {
     setErros(msg, linha, coluna) {
         this.errosSintaticos.push({
             mensagem: `<span class='erro-code'>${msg}</span>`,
-            linha,
-            coluna
+            linha: linha ?? 0,
+            coluna: coluna ?? 0
         })
     }
 
     setAvisos(msg, linha, coluna) {
         this.avisosSintaticos.push({
             mensagem: `<span class='aviso-code'>${msg}</span>`,
-            linha,
-            coluna
+            linha: linha ?? 0,
+            coluna: coluna ?? 0
         })
     }
 
@@ -994,7 +999,7 @@ class AnalisadorSintatico {
         let posDelimitadorColuna = this.obj_nontuplas.alfaberto_fita.indexOf(SimbolosEspeciais.delimitador.simbolo1) + 2
         // Verifica se há algum comando de partida informada
         if(estado_inicial.length == 0) {
-            this.setAvisos(`Não foi entrado o estado de partida. O estado inicial deve está no formato "${this.obj_nontuplas.estado_inicial.join('')} ${SimbolosEspeciais.delimitador.simbolo1} ${Dicionario.MOVER.R}".`, 1, posDelimitadorColuna)
+            this.setAvisos(`Não foi encontrado o estado de partida (estado inicial). O estado inicial deve está no formato "${this.obj_nontuplas.estado_inicial.join('')} ${SimbolosEspeciais.delimitador.simbolo1} ${Dicionario.MOVER.R}".`, 1, posDelimitadorColuna)
             return
         }
 
@@ -1006,7 +1011,20 @@ class AnalisadorSintatico {
     }
 
     verificarErrosEstadoFinal() {
-        
+        const estado_final = this.analisadorSematico.filter(cmd => cmd.estado == this.obj_nontuplas.estado_final.join('').trim())
+    }
+
+    verificarDeclaracaoTodosEstados() {
+        // let isTodosEstadoDeclarados = true
+        // for(let i = 0; i < this.obj_nontuplas.estado_nao_final.length; i++) {
+        //     isTodosEstadoDeclarados = isTodosEstadoDeclarados && this.analisadorSematico.estado_apontador_declarado.has(this.obj_nontuplas.estado_nao_final[i])
+        // }
+
+        const estados_nao_finais_nao_declados = this.obj_nontuplas.estado_nao_final.filter(estados_nao_finais => !this.analisadorSematico.estado_apontador_declarado.has(estados_nao_finais))
+
+        if(estados_nao_finais_nao_declados.length > 0) {
+            this.setAvisos(`Os estados "{${estados_nao_finais_nao_declados.join(', ')}}" precisa ser declarado na primeira coluna.`)
+        }
     }
 
 }
@@ -1029,19 +1047,19 @@ class AnalisadorSemantico {
     }
 
     setEstado(estado, linha, coluna) {
-        this.estado = estado
+        this.estado = estado.trim()
         this.num_linha = linha
         this.num_coluna = coluna
     }
 
     setAlfaberto(alfaberto_fita, linha, coluna) {
-        this.alfaberto_fita = alfaberto_fita
+        this.alfaberto_fita = alfaberto_fita.trim()
         this.num_linha = linha
         this.num_coluna = coluna
     }
 
     setMovimentador(movimentador, linha, coluna) {
-        this.movimentador = movimentador
+        this.movimentador = movimentador.trim()
         this.num_linha = linha
         this.num_coluna = coluna
         this.setMovimentadorList()

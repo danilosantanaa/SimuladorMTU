@@ -57,6 +57,9 @@ function setConsoleLogs(errosLexico = [], errosSintatico = [],  avisos = []) {
     setItemConsole(errosLexico)
     setItemConsole(errosSintatico)
     setItemConsole(avisos)
+
+    setTotAvisos(avisos.length)
+    setTotErro(errosLexico.length + errosSintatico.length)
 }
 
 export {

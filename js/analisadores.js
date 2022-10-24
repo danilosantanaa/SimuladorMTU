@@ -1031,6 +1031,10 @@ class AnalisadorSintatico {
         }
     }
 
+    isErrosOuAvisos() {
+        return this.errosSintaticos.length > 0 || this.analisadorLexico.errorList.length > 0 || this.avisosSintaticos.length > 0
+    }
+
 }
 
 class AnalisadorSemantico {
@@ -1097,28 +1101,30 @@ class Linguagem {
         const escopo = this
         this.el_fita = document.querySelector(".fitas")
         this.el_entrada = document.querySelectorAll(".fitas > div")
-        this.el_tbody = el_tbody
+        // this.el_tbody = el_tbody
         this.obj_nontuplas = obj_nontuplas
-        this.ponteiro = document.querySelector("#cabecote")
+        this.el_ponteiro = document.querySelector("#cabecote")
 
         this.analisadorSintatico = new AnalisadorSintatico(obj_nontuplas)
-        this.is_executar = true
+        this.is_executar = !this.analisadorSintatico.isErrosOuAvisos()
 
         // Parte que será mostrada no console
         this.el_cli = document.querySelector(".cmd-line-display")
         
         // Variavel de controle
         this.el_btn_parar = document.querySelector(".btn.parar")
-        this.is_stop = false
-        
+    
         this.el_btn_parar.addEventListener("click", () => {
-            escopo.is_stop = true
+            escopo.is_executar = false
         }, true)
         
         
-        this.el_range_input = document.querySelector("#velocidade")
+       this.el_range_input = document.querySelector("#velocidade")
+       this.setVelocidade()
+    }
+
+    setVelocidade() {
         this.calcularVelocidade()
-        
         this.time = 500 * Number(this.el_range_input.value) / 
         this.el_range_input.addEventListener("change", (e) => {
             this.calcularVelocidade()
@@ -1134,10 +1140,10 @@ class Linguagem {
     mostrarBarraRolagem() {
         if(this.el_fita.classList.contains("rolagem")) {
             this.el_fita.classList.remove("rolagem")
-            this.ponteiro.classList.add("rolagem")
+            this.el_ponteiro.classList.add("rolagem")
         } else {
             this.el_fita.classList.add("rolagem")
-            this.ponteiro.classList.remove("rolagem")
+            this.el_ponteiro.classList.remove("rolagem")
         }
     }
 
@@ -1148,6 +1154,7 @@ class Linguagem {
 
         this.mostrarBarraRolagem()
         this.setPosCabecote()
+        this.setErrosConsoles()
         while(contador >= 0 && this.is_executar && totRodada <= 3000) {
             let entrada = this.el_entrada[contador].innerText.trim()
 
@@ -1167,8 +1174,8 @@ class Linguagem {
                 }
 
                 if(Dicionario.MOVER.R == cmds.movimentador) {
-                    await this.moverDireita(this.el_entrada[contador], contador)
                     this.setEntrada(contador, cmds.alfaberto_fita_subs)
+                    await this.moverDireita(this.el_entrada[contador], contador)
                     contador++
                 } 
                 
@@ -1186,6 +1193,7 @@ class Linguagem {
         }
 
         this.mostrarBarraRolagem();
+        this.setPosCabecote()
     }
 
     setEntrada(pos, caracter) {
@@ -1201,9 +1209,14 @@ class Linguagem {
 
     setPosCabecote() {
         // Resertando configurações de estilo colocaod pelo script
-        this.ponteiro.style.left = '0px'
+        this.el_ponteiro.style.left = '0px'
         this.el_fita.scrollLeft = 0
         document.querySelector("#estado-display").innerHTML = '-';
+    }
+
+    setErrosConsoles() {
+        abrirFecharConsole(true)
+        setConsoleLogs(this.analisadorSintatico.analisadorLexico.errorList, this.analisadorSintatico.errosSintaticos, this.analisadorSintatico.avisosSintaticos)
     }
 
     // Move o cabecote para o lado direto da fita
@@ -1224,9 +1237,9 @@ class Linguagem {
             }
             await this.dormir(quadro_por_segundos)
         } else {
-            for(let i = this.ponteiro.offsetLeft; i < coords_cedula.left + coords_cedula.width / 2; i++) {
+            for(let i = this.el_ponteiro.offsetLeft; i < coords_cedula.left + coords_cedula.width / 2; i++) {
                 await this.dormir(quadro_por_segundos)
-                this.ponteiro.style.left = `${i}px`
+                this.el_ponteiro.style.left = `${i}px`
             }
         }
 
@@ -1244,12 +1257,12 @@ class Linguagem {
         this.calcularVelocidade()
         const quadro_por_segundos = Math.floor(10 * this.time / 500)
         if(pos * coords_cedula.width < coords_fita.width / 2 - coords_cedula.width / 2) {
-            let final =  this.ponteiro.offsetLeft
+            let final =  this.el_ponteiro.offsetLeft
             let inicio = final - coords_cedula.width
 
             for(let i = final; i >= inicio; i--) {
                 await this.dormir(quadro_por_segundos)
-                this.ponteiro.style.left = `${i}px`
+                this.el_ponteiro.style.left = `${i}px`
             }
         } else {
             let final = this.el_fita.scrollLeft

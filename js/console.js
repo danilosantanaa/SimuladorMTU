@@ -18,6 +18,8 @@ function abrirFecharConsole(abrir_automatico = false) {
 
     if(abrir_automatico) {
         abrir()
+    } else {
+        fechar()
     }
 }
 

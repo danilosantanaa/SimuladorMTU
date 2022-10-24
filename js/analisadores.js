@@ -1211,11 +1211,11 @@ class Linguagem {
         // Resertando configurações de estilo colocaod pelo script
         this.el_ponteiro.style.left = '0px'
         this.el_fita.scrollLeft = 0
-        document.querySelector("#estado-display").innerHTML = '-';
+        //document.querySelector("#estado-display").innerHTML = '-';
     }
 
     setErrosConsoles() {
-        abrirFecharConsole(true)
+        abrirFecharConsole(!this.is_executar)
         setConsoleLogs(this.analisadorSintatico.analisadorLexico.errorList, this.analisadorSintatico.errosSintaticos, this.analisadorSintatico.avisosSintaticos)
     }
 

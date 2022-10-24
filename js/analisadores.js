@@ -817,6 +817,7 @@ class AnalisadorSintatico {
     constructor(obj_nontuplas) {
         this.analisadorLexico = new AnalisadorLexico()
         this.obj_nontuplas = obj_nontuplas
+        this.comandos = []
 
         this.lookahead = 0
         this.errosSintaticos = []
@@ -851,6 +852,7 @@ class AnalisadorSintatico {
                     this.setAvisos(`O Estado "${this.analisadorSematico.estado}" não pode ser declarado. Estado final não precisa ser declarado na primeira coluna.`)
                 } else {
                     this.analisadorSematico.estado_apontador_declarado.set(this.analisadorSematico.estado, ListaTokens.ESTADO)
+                    this.analisadorSematico.estado_apontador = this.analisadorSematico.estado
                 }
             } else {
                 this.setErros(`O ESTADO "${this.analisadorSematico.estado}" já foi declarado.`, this.analisadorSematico.num_linha, this.analisadorSematico.num_coluna)
@@ -894,6 +896,13 @@ class AnalisadorSintatico {
             this.alfabertoFita()
             this.movimento()
             this.analisadorSematico.setComandos()
+            this.comandos.push({
+                estado_apontador: this.analisadorSematico.estado_apontador,
+                estado: this.analisadorSematico.estado,
+                alfaberto_fita_header: this.obj_nontuplas.alfaberto_fita[stmt.coluna-2],
+                alfaberto_fita_subs: this.analisadorSematico.alfaberto_fita,
+                movimentador: this.analisadorSematico.movimentador
+            })
 
             this.pontoVirgula(false)
             this.comando()
@@ -929,7 +938,7 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead]
 
         if(stmt.token != ListaTokens.ALFABERTOFITA) {
-            this.setErros(`Esperava um ALFABERTO DE FITA e não um "${stmt.valor}"`, stmt.linha, stmt.coluna)
+            this.setErros(`Esperava um ALFABERTO DE FITA e não um "${stmt.valor != ";" ? stmt.valor : ""}"`, stmt.linha, stmt.coluna)
         } else if(stmt != null) {
 
             // Verificando se o alfaberto de fita pertence ao conjuntos de alfaberto declarada na nontuplas
@@ -946,7 +955,7 @@ class AnalisadorSintatico {
         const stmt = this.analisadorLexico.tabelaSimbolos[this.lookahead] 
 
         if(stmt.token != ListaTokens.MOVIMENTO) {
-            this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor}". O movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
+            this.setErros(`Esperava um MOVIMENTADOR não um "${stmt.valor != ";" ? stmt.valor : ""}". O movimentador válido são: R, L ou P e somente um deles.`, stmt.linha, stmt.coluna)
         }
 
         if(!this.isEstadoFinal) {
@@ -1015,11 +1024,6 @@ class AnalisadorSintatico {
     }
 
     verificarDeclaracaoTodosEstados() {
-        // let isTodosEstadoDeclarados = true
-        // for(let i = 0; i < this.obj_nontuplas.estado_nao_final.length; i++) {
-        //     isTodosEstadoDeclarados = isTodosEstadoDeclarados && this.analisadorSematico.estado_apontador_declarado.has(this.obj_nontuplas.estado_nao_final[i])
-        // }
-
         const estados_nao_finais_nao_declados = this.obj_nontuplas.estado_nao_final.filter(estados_nao_finais => !this.analisadorSematico.estado_apontador_declarado.has(estados_nao_finais))
 
         if(estados_nao_finais_nao_declados.length > 0) {
@@ -1031,6 +1035,7 @@ class AnalisadorSintatico {
 
 class AnalisadorSemantico {
     constructor() {
+        this.estado_apontador = null
         this.estado = null
         this.alfaberto_fita = null
         this.movimentador = null
@@ -1044,6 +1049,8 @@ class AnalisadorSemantico {
         
         this.comandosList = []
         this.movimentadorList = []
+
+        this.matrAdjacente = new Map()
     }
 
     setEstado(estado, linha, coluna) {
@@ -1099,42 +1106,6 @@ class Linguagem {
 
         // Parte que será mostrada no console
         this.el_cli = document.querySelector(".cmd-line-display")
-
-
-        this.string_lang = ""
-        // FASE DO ANALISADOR
-        this.comandosExecutar = []
-        this.lookahead = 0
-        this.TOKENS = {
-            ESTADO_PONTEIRO: 100,
-            ESTADO: 200,
-            ALFABERTOFITA: 300,
-            MOVIMENTO: 400
-        }
-
-        // ARMAZENA A LISTA DE TOKENS IDENTIFICADO NA FASE LEXICA
-        this.listStmts = []
-
-        // GUARDAR OS ERROS DETECTADOS NA FASE DA ANALISE LEXICA E SINTATICA
-        this.totErroLexico = 0
-        this.totErroSintatico = 0
-        this.totColunaLida = 0
-        this.erroListLexico = []
-        this.erroListSintatico = []
-
-        this.caracter_especial = {
-            delimitador: {
-                simbolo1: ">",
-                simbolo2: "►"
-            },
-
-            branco_fita: {
-                simbolo1: "b",
-                simbolo2: "Б"
-            }
-        }
-
-        this.qtdCedulaPercorrida = 0;
         
         // Variavel de controle
         this.el_btn_parar = document.querySelector(".btn.parar")
@@ -1159,113 +1130,6 @@ class Linguagem {
         this.time = Math.floor(1 / valorAtual * 500)
     } 
 
-    get cadeia() {
-        return this.el_entrada.value.replaceAll(" ", "")
-    }
-
-    get caracter() {
-
-        if(this.pos_lido < this.cadeia) {
-            return this.cadeia.substring(this.pos_lido, this.pos_lido + 1)
-        }
-
-        return null
-    }
-
-    proximoCaracter() {
-        this.pos_lido++
-    }
-
-    lerTabela() {
-        // Analise lexica
-        this.comandosExecutar = []
-        let totLinha = 1
-        for(let linha of this.el_tbody.querySelectorAll("tr")) {
-            const elementos = []
-            
-            let totColuna = 1
-            for(let coluna of linha.querySelectorAll("td:not(.cmd-linha)")) {
-
-                // Gerando sequência de strings para transformar em linguagem
-                if(coluna.innerText.trim() != "") {
-                    this.string_lang += `${coluna.innerText.trim()}, `
-                
-                    // Salvando o código, pode esta salvando código inválido, não há implementação da geração de código intermediario, será feita mais adiante
-                    let stmt = this.gerarComandos(coluna.innerText.trim(), totLinha, totColuna)
-                    if(stmt != undefined) {
-                        elementos.push(stmt)
-                    }
-                }
-
-                totColuna++
-            }
-
-            this.string_lang += "\n"
-            
-            this.comandosExecutar.push(elementos)
-            
-            totLinha++
-        }
-
-        setTotErro(0)
-        setTotAvisos(0)
-        this.is_executar = true
-        if(this.analisadorSintatico.analisadorLexico.errorList.length > 0) {
-            setTotErro(this.analisadorSintatico.analisadorLexico.errorList.length)
-            abrirFecharConsole(true)
-            this.is_executar = false
-        } 
-
-        if(this.analisadorSintatico.errosSintaticos.length > 0) {
-            setTotErro(this.analisadorSintatico.errosSintaticos.length)
-            abrirFecharConsole(true)
-            this.is_executar = false
-        }
-
-        if(this.analisadorSintatico.avisosSintaticos.length > 0) {
-            setTotAvisos(this.analisadorSintatico.avisosSintaticos.length)
-            abrirFecharConsole(true)
-            this.is_executar = false
-        }
-
-        setConsoleLogs(this.analisadorSintatico.analisadorLexico.errorList, this.analisadorSintatico.errosSintaticos, this.analisadorSintatico.avisosSintaticos)
-    }
-
-    gerarComandos(valor = "", linha, coluna) {
-        let stmt = undefined
-
-        if(valor != "") {
-            const expr_regular = new ExpressaoRegular()
-
-            if(expr_regular.Validadores.VALIDAR_PONTEIRO.test(valor)) {
-                stmt =  {
-                    conteudo: {
-                        estado: valor,
-                        valor: undefined,
-                        direcao: undefined
-                    },
-                    linha,
-                    coluna,
-                    tipo: Dicionario.TIPO_TOKEN.PONTEIRO
-                }
-                
-            } else if(expr_regular.Validadores.VALIDAR_COMANDOS.test(valor)) {
-                let cmds = valor.split(" ")
-                stmt =  {
-                    conteudo: {
-                        estado: cmds[0],
-                        valor: cmds[1],
-                        direcao: cmds[2]
-                    },
-                    linha,
-                    coluna,
-                    tipo: Dicionario.TIPO_TOKEN.COMANDO
-                }
-            } 
-        }
-
-        return stmt
-    }
 
     mostrarBarraRolagem() {
         if(this.el_fita.classList.contains("rolagem")) {
@@ -1277,117 +1141,74 @@ class Linguagem {
         }
     }
 
-    // Executa a sequência de comandos
     async executarComandos() {
-        this.mostrarBarraRolagem()
+        let contador = 0
+        let totRodada = 0 // Frag que detecta possivel loop infinito
+        let estado = this.obj_nontuplas.estado_inicial.join('').trim()
 
-        const tr_cmds = this.el_tbody.querySelectorAll("tr")
-    
+        this.mostrarBarraRolagem()
+        this.setPosCabecote()
+        while(contador >= 0 && this.is_executar && totRodada <= 3000) {
+            let entrada = this.el_entrada[contador].innerText.trim()
+
+            entrada = entrada.replace(SimbolosEspeciais.delimitador.simbolo2, SimbolosEspeciais.delimitador.simbolo1)
+            entrada = entrada.replace(SimbolosEspeciais.branco_fita.simbolo2, SimbolosEspeciais.branco_fita.simbolo1)
+
+            const cmds = this.analisadorSintatico.comandos.filter(cmd => cmd.alfaberto_fita_header == entrada && cmd.estado_apontador == estado)[0]
+
+            if(cmds != undefined) {
+                estado = cmds.estado
+                document.querySelector("#estado-display").innerText = estado
+
+                if(Dicionario.MOVER.L == cmds.movimentador) {
+                    this.setEntrada(contador, cmds.alfaberto_fita_subs)
+                    await this.moverEsquerda(this.el_entrada[contador], contador)
+                    contador--
+                }
+
+                if(Dicionario.MOVER.R == cmds.movimentador) {
+                    await this.moverDireita(this.el_entrada[contador], contador)
+                    this.setEntrada(contador, cmds.alfaberto_fita_subs)
+                    contador++
+                } 
+                
+                if(Dicionario.MOVER.P == cmds.movimentador) {
+                    await this.dormir(this.time)
+                    this.setEntrada(contador, cmds.alfaberto_fita_subs)
+                    await this.dormir(this.time)
+                }
+
+
+                if(Dicionario.MOVER.P == cmds.movimentador) break
+            }
+
+            totRodada++
+        }
+
+        this.mostrarBarraRolagem();
+    }
+
+    setEntrada(pos, caracter) {
+
+        if(caracter == SimbolosEspeciais.branco_fita.simbolo1) {
+            this.el_entrada[pos].innerText = SimbolosEspeciais.branco_fita.simbolo2
+        } else if (caracter == SimbolosEspeciais.delimitador.simbolo1) {
+            this.el_entrada[pos].innerText = SimbolosEspeciais.delimitador.simbolo2
+        } else {
+            this.el_entrada[pos].innerText = caracter
+        }
+    }
+
+    setPosCabecote() {
         // Resertando configurações de estilo colocaod pelo script
         this.ponteiro.style.left = '0px'
         this.el_fita.scrollLeft = 0
-        const el_estado_display = document.querySelector("#estado-display");
-
-        // Pega o estado inicial
-        let estado_atual = this.obj_nontuplas.estado_inicial[0]
-
-        // Mostra no display o estado aonde esta sendo lido
-        el_estado_display.innerText = estado_atual
-
-        const POS_INVALIDA = -1
-        if(this.comandosExecutar.length > 0 && this.is_executar) {
-            let contador = 0;
-            while( contador < this.el_entrada.length && contador >= 0 && !this.is_stop) {
-                // Ler a cedula da fita
-                let entrada = this.el_entrada[contador].innerText.trim()
-
-                // Ler elemento que foi inserido na tabela
-                let pos_alfaberto_fita = this.getPosColunaLeitura(entrada)
-                let pos_estado_ponteiro = this.getComandos(estado_atual)
-                
-                // Verifica se o comando foi encontrado
-                if(pos_alfaberto_fita != POS_INVALIDA && pos_estado_ponteiro != POS_INVALIDA) {
-                    let cmd = this.comandosExecutar[pos_estado_ponteiro][pos_alfaberto_fita]
-
-                    // Marca a tabela atual que esta sendo executado
-                    let el_cedula = tr_cmds[pos_estado_ponteiro].querySelectorAll("td:not(.cmd-linha)")[pos_alfaberto_fita]
-                    let el_cedula_original = el_cedula.innerHTML
-                    el_cedula.innerHTML = "<i class='fa-solid fa-play executar-player'></i> " + el_cedula_original
-
-                    // Estado atual de executação
-                    estado_atual = cmd.conteudo.estado
-
-                    // Mostra o estado atual de execução
-                    el_estado_display.innerText = estado_atual
-
-                    trocarValores(this.el_entrada[contador], cmd.conteudo.valor)
-                    
-                    // Verifica se esta movendo para a direita
-                    if(cmd.conteudo.direcao == Dicionario.MOVER.R) {
-                        await this.moverDireita(this.el_entrada[contador])
-                        el_cedula.innerHTML = el_cedula_original
-                        contador++
-                    }
-                    
-                    // Verifica se esta movendo para esquerda
-                    if(cmd.conteudo.direcao == Dicionario.MOVER.L) {
-                        await this.moverEsquerda(this.el_entrada[contador])
-                        el_cedula.innerHTML = el_cedula_original
-                        contador--
-                    }
-
-                    // Verifica se houve comando de parada
-                    if(cmd.conteudo.direcao == Dicionario.MOVER.P) {
-                        await this.dormir(parseInt(this.time / 2));
-                        el_cedula.innerHTML = el_cedula_original
-                        await this.dormir(parseInt(this.time / 2));
-                        break
-                    }
-
-                } else {
-                    console.log('ERRO! Comando Invalido')
-                    break
-                }
-            }
-        }
-
-        this.mostrarBarraRolagem()
-    }
-
-    // Executa o comandos e mostra a fita
-
-    // Pesquisa na posição do alfaberto de fita qual pertence o valor lido
-    getPosColunaLeitura(valor) {
-
-        // Tira a formatação do delimitador e branco de fita
-        valor = valor == this.caracter_especial.delimitador.simbolo2 ? this.caracter_especial.delimitador.simbolo1 : valor
-        valor = valor == this.caracter_especial.branco_fita.simbolo2 ? this.caracter_especial.branco_fita.simbolo1 : valor
-        
-        // Busca o caracter
-        if(this.obj_nontuplas.alfaberto_fita.length > 0) {
-            for(let j = 0; j < this.obj_nontuplas.alfaberto_fita.length; j++) {
-                if(valor == this.obj_nontuplas.alfaberto_fita[j]) return j + 1
-            }
-        }
-
-        return -1
-    }
-
-    // Retorna o comando aonde estar o estado atual da tabela
-    getComandos(estado) {
-        const POS_PONTEIRO = 0
-        for(let i = 0; i < this.comandosExecutar.length; i++) {
-            if(this.comandosExecutar[i][POS_PONTEIRO].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado == this.comandosExecutar[i][POS_PONTEIRO].conteudo.estado ) {
-                return i
-            }
-        }
-
-        return -1
+        document.querySelector("#estado-display").innerHTML = '-';
     }
 
     // Move o cabecote para o lado direto da fita
-    async moverDireita(el_cedula) {
-        this.qtdCedulaPercorrida++;
+    async moverDireita(el_cedula, pos) {
+        pos++;
         await this.dormir(this.time)
         
         const coords_cedula = el_cedula.getBoundingClientRect()
@@ -1395,7 +1216,7 @@ class Linguagem {
 
         this.calcularVelocidade()
         const quadro_por_segundos = Math.floor(10 * this.time / 500)
-        if(this.qtdCedulaPercorrida * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2 && this.el_fita.scrollWidth - coords_fita.width != this.el_fita.scrollLeft) {
+        if(pos * coords_cedula.width - coords_cedula.width / 2 >= coords_fita.width / 2 && this.el_fita.scrollWidth - coords_fita.width != this.el_fita.scrollLeft) {
             let inicio = this.el_fita.scrollLeft
             for(let i = inicio; i <= inicio + coords_cedula.width; i++) {
                 await this.dormir(quadro_por_segundos)
@@ -1412,10 +1233,9 @@ class Linguagem {
 
     }
 
-
     // Move o cabeçote para lado esquerdo da fita
-    async moverEsquerda(el_cedula) {
-        this.qtdCedulaPercorrida--
+    async moverEsquerda(el_cedula, pos) {
+        pos--
         await this.dormir(this.time)
         
         const coords_cedula = el_cedula.getBoundingClientRect()
@@ -1423,7 +1243,7 @@ class Linguagem {
 
         this.calcularVelocidade()
         const quadro_por_segundos = Math.floor(10 * this.time / 500)
-        if(this.qtdCedulaPercorrida * coords_cedula.width < coords_fita.width / 2 - coords_cedula.width / 2) {
+        if(pos * coords_cedula.width < coords_fita.width / 2 - coords_cedula.width / 2) {
             let final =  this.ponteiro.offsetLeft
             let inicio = final - coords_cedula.width
 
@@ -1442,10 +1262,6 @@ class Linguagem {
         }
     }
 
-    pontoExecucao(estado_atual) {
-        return this.comandosExecutar.find(x => x[0].tipo == Dicionario.TIPO_TOKEN.PONTEIRO && estado_atual == x.conteudo.estado)
-    }
-
     async dormir(ms) {
         return new Promise(resolve => setTimeout(resolve, ms))
     }
@@ -1458,8 +1274,6 @@ const el_btn_resertar = document.querySelector(".btn.resertar")
 
 el_btn_executar.addEventListener("click", async() => {
     const linguagem = new Linguagem(el_tbody_codigo, analisadorSintaticoNontupla.getNontupla())
-    linguagem.lerTabela()
-    console.log(" Teste ", linguagem.comandosExecutar)
 
     await linguagem.executarComandos()
 }, true)

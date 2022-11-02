@@ -1,5 +1,6 @@
 import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais, moverCursorContentEditableFinal } from "./ManipularDOM.js"
 import { abrirFecharConsole, setTotErro, setTotAvisos, setConsoleLogs} from "./console.js"
+
 /**
  *
  * Tabela de simbolos
@@ -518,10 +519,7 @@ class TabelaTransicao {
         })
 
         td.addEventListener("focus", callback)
-        td.addEventListener("blur", () => {
-            callback()
-        })
-
+        td.addEventListener("blur",  callback)
     }
 
     addEventoRemoverUltimaLinha(linha) {
@@ -549,6 +547,7 @@ class TabelaTransicao {
         const obj_escopo = this
 
         if(this.isUltimaLinha(coluna)) {
+            
             // Gerar uma nova linha
             const listener = e => {
                 if(e.keyCode == obj_escopo.TECLA_TAB || e.keyCode == obj_escopo.TECLA_ENTER) {
@@ -646,11 +645,6 @@ const Dicionario = {
         R: "R",
         L: "L",
         P: "P"
-    },
-
-    TIPO_TOKEN: {
-        PONTEIRO: 1,
-        COMANDO: 2
     }
 }
 
@@ -700,13 +694,6 @@ class AnalisadorLexico {
 
             this.string_lang += "\n "
         }
-    }
-
-    /**
-     * Ler o arquivo e gera a sequência de caracteres
-     */
-    lerArquivo() {
-
     }
 
     /**
@@ -948,8 +935,6 @@ class AnalisadorSintatico {
 
         if(stmt.token != ListaTokens.DELIMITADOR_APONTADOR) {
             this.setErros(`Deve haver um operador no código-fonte que simboliza estado apontador"`, stmt.linha, stmt.coluna)
-        } else {
-
         }
 
         this.proximoToken()
@@ -1231,15 +1216,29 @@ class Linguagem {
     }
 
     async executarComandos() {
-        let contador = 0
-        let totRodada = 0 // Frag que detecta possivel loop infinito
-        let estado = this.obj_nontuplas.estado_inicial.join('').trim()
+        this.mostrarValidCadeia(true)
+        this.setErrosConsoles()
+        
+        if(this.is_executar) {
+            this.lerComandos()
+        }
+    }
+    
+    async lerComandos() {
 
+        // Contadores
+        let contador = 0
+        let totRodada = 0
+        
+        // DOM
         this.mostrarBarraRolagem()
         this.setPosCabecote()
-        this.setErrosConsoles()
-        this.mostrarValidCadeia(true)
-        while(contador >= 0 && this.is_executar && totRodada <= 3000) {
+
+        // Coloca o estado inicial declarado na nontupla
+        let estado = this.obj_nontuplas.estado_inicial.join('').trim()
+        
+        // Executa os comandos
+        while(contador >= 0 && totRodada <= 3000) {
             let entrada = this.el_entrada[contador].innerText.trim()
 
             entrada = entrada.replace(SimbolosEspeciais.delimitador.simbolo2, SimbolosEspeciais.delimitador.simbolo1)
@@ -1279,7 +1278,6 @@ class Linguagem {
         this.mostrarBarraRolagem();
         this.setPosCabecote()
         this.setValidarCadeia()
-
     }
 
     mostrarValidCadeia(esconder =  false) {

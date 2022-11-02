@@ -469,17 +469,24 @@ class TabelaTransicao {
     monitorandoTabela() {
         let tot_linha = 0
         for(let linha of this.getLinhas()) {
+
             for(let coluna of this.getColuna(linha)) {
+
+                if(coluna.classList.contains('cmd-linha')) {
+                    coluna.innerText = tot_linha + 1
+                }
+
                 this.ultimaLinhaEvento(linha, coluna, tot_linha)
                 this.codigoFormatadoChange(coluna)
             }
+
+            if(tot_linha > 0) {
+                this.addEventoRemoverUltimaLinha(linha)
+            }
+
             tot_linha++
         }
 
-        // const linhas = this.getLinhas()
-        // if(linhas.length > 1) {
-        //     this.addEventoRemoverUltimaLinha(linhas, tot_linha)
-        // }
     }
 
     codigoFormatadoChange(td) {
@@ -516,26 +523,26 @@ class TabelaTransicao {
 
     }
 
-    // addEventoRemoverUltimaLinha(linhas, tot) {
-    //     const td = linhas[linhas.length - 1].querySelector("[estado-apontador]")
+    addEventoRemoverUltimaLinha(linha) {
+        const td = linha.querySelector("[estado-apontador]")
 
-    //     const listener = e => {
-    //         if(td.innerText.trim() == "" && e.keyCode == this.DELETE) {
-    //             try {
-    //                 this.el_tbody.removeChild(linhas[linhas.length - 1])
-    //                 td.removeEventListener("keydown", listener, false)
-    //                 this.monitorandoTabela()
-    //             } catch(e) {
-    //                 console.log(e)
-    //             }
-    //         }
-    //     }
+        const listener = (linha, e) => {
+            
+            if(td.innerText.trim() == "" && e.keyCode == this.DELETE) {
+                try {
+                    this.el_tbody.removeChild(linha)
+                } catch(e) {
+                    console.log(e)
+                } finally {
+                    this.monitorandoTabela()
+                }
+            }
+        } 
 
-    //     if(tot == linhas.length -1) {
-    //         td.addEventListener("keydown", listener, false)
-    //     }
-
-    // }
+        td.onkeydown = e => {
+            listener(linha, e)
+        }
+    }
 
     ultimaLinhaEvento(linha, coluna, tot) {
         const obj_escopo = this
@@ -551,19 +558,17 @@ class TabelaTransicao {
                     obj_escopo.getColuna(el_nova_linha)[1].focus()
 
                     obj_escopo.monitorandoTabela()
-                    
-                    coluna.removeEventListener("keydown", listener, false)
                 }
             }
 
-            coluna.addEventListener("keydown", listener, false)
+            coluna.onkeydown = listener
 
         } else {
-            coluna.addEventListener("keydown", e => {
+            coluna.onkeydown = e => {
                 if(obj_escopo.TECLA_ENTER == e.keyCode) {
                     e.preventDefault()
                 }
-            }, false)
+            }
         }
     }
 

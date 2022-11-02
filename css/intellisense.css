@@ -16,6 +16,9 @@
     font-weight: bolder;
 }
 
+.cmd-apontador {
+    color: blue;
+}
 
 .executar-player {
     color: red;
@@ -34,7 +37,5 @@
     color: yellow;
 }
 
-td[estado-apontador] {
-    color: blue;
-}
+
 /* 17 65 */

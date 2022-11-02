@@ -30,7 +30,8 @@ class ExpressaoRegular {
         }
 
         this.Substituicao = {
-            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►])?(\s*)([R|L|P]?)\s*$/g
+            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►])?(\s*)([R|L|P]?)\s*$/g,
+            ESTADO: /^\s*([qQ][0-9]+)(\s*)$/g
         }
     }
 }
@@ -492,6 +493,8 @@ class TabelaTransicao {
 
                 if(coluna.classList.contains('cmd-linha')) {
                     coluna.innerText = tot_linha + 1
+                } else if(coluna.hasAttribute("estado-apontador")) {
+                    this.apontadorFormatoChange(coluna)
                 } else {
                     this.codigoFormatadoChange(coluna)
                 }
@@ -506,6 +509,35 @@ class TabelaTransicao {
             tot_linha++
         }
 
+    }
+
+    apontadorFormatoChange(td) {
+        const callback = () => {
+            let exRegular = new ExpressaoRegular()
+            td.innerHTML = td.innerText.replace(exRegular.Substituicao.ESTADO, `<span class='cmd-apontador'>$1</span>`)
+        }
+        td.addEventListener("keyup", (e) => {
+            if(!this.isCtrlPrecionado) {
+                this.isCtrlPrecionado = e.keyCode == 17
+            } 
+
+            if(this.isCtrlPrecionado && !this.IsLetraA) {
+                this.IsLetraA = e.keyCode == 65
+            } else if(this.isCtrlPrecionado) {
+                this.isCtrlPrecionado = false
+            }
+
+            if(this.isCtrlPrecionado && this.IsLetraA) {
+                this.isCtrlPrecionado = false
+                this.IsLetraA = false
+            }else if(e.keyCode >= 48 && e.keyCode <= 126 || e.keyCode == 9) {
+                callback()
+                moverCursorContentEditableFinal(td)
+            }
+        })
+        
+        td.addEventListener("focus", callback)
+        td.addEventListener("blur",  callback)
     }
 
     codigoFormatadoChange(td) {

@@ -56,13 +56,16 @@ class AnalisadorSintaticoNonTuplas {
         
         // Atribuindo eventos a cada elemento da nontupla
         this.eventosFocusOut()
+
+        // 
+        this.is_tabela_gerada = false
     }
 
     eventosFocusOut() {
         this.el_conjunto_estado.addEventListener("focusout", () => {
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
-            this.gerarTabela()
+            this.gerarTabela(!this.is_tabela_gerada)
         })
         
         this.el_alfaberto.addEventListener("focusout", () => {
@@ -74,20 +77,20 @@ class AnalisadorSintaticoNonTuplas {
         this.el_estado_inicial.addEventListener("focusout", () => {
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
-            this.gerarTabela()
+            this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_estado_final.addEventListener("focusout", () => {
             this.estado_final
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
-            this.gerarTabela()
+            this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_estado_nao_final.addEventListener("focusout", () => {
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
-            this.gerarTabela()
+            this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_alfaberto_fita.addEventListener("focusout", () => {
@@ -118,8 +121,8 @@ class AnalisadorSintaticoNonTuplas {
             } 
     }
 
-    gerarTabela() {
-        if(this.isAlfabertoFitaPreenchida()) {
+    gerarTabela(is_gerar_novamente = true) {
+        if(this.isAlfabertoFitaPreenchida() && is_gerar_novamente) {
             if(this.isNontuplaValida()) {
                 this.el_div_tb_content.classList.add("mostrar")
                 this.el_div_tb_content.classList.remove("ocultar")
@@ -130,7 +133,8 @@ class AnalisadorSintaticoNonTuplas {
                 // Focando na primeira linha
                 const td_focus = document.querySelector("#primeira-linha-focus")
                 td_focus.focus({focusVisible: true})
-    
+                
+                this.is_tabela_gerada = true
             } else {
                 this.el_div_tb_content.classList.add("ocultar")
                 this.el_div_tb_content.classList.remove("mostrar")

@@ -229,13 +229,30 @@ main {
     background-color: rgb(1, 66, 1);
 }
 
+.entrada-dados .btn.executar[disabled], 
+.entrada-dados .btn.resertar[disabled], 
+.entrada-dados .btn.resertar[disabled]:hover,
+.entrada-dados .btn.parar[disabled],
+.entrada-dados .btn.parar[disabled]:hover {
+    background-color: #cecece;
+}
+
 .entrada-dados .btn.parar {
     background-color: red;
     border-color: rgb(185, 2, 2);
 }
 
+
 .entrada-dados .btn.parar:hover {
     background-color: rgb(185, 2, 2);
+}
+
+.entrada-dados .btn.resertar {
+    background-color: var(--color2);
+}
+
+.entrada-dados .btn.resertar:hover {
+    background-color: var(--color1);
 }
 
 .entrada-dados input[type="range"] {

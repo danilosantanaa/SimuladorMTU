@@ -1181,9 +1181,9 @@ class Linguagem {
         
         // Variavel de controle
         this.el_btn_parar = document.querySelector(".btn.parar")
-    
+        this.is_parar = false
         this.el_btn_parar.addEventListener("click", () => {
-            escopo.is_executar = false
+            escopo.is_parar = true
         }, true)
         
         
@@ -1223,6 +1223,23 @@ class Linguagem {
             this.lerComandos()
         }
     }
+
+    statusBtnExecutar(executando = false) {
+        const btn_executar = document.querySelector(".executar")
+        const btn_resertar = document.querySelector(".resertar")
+        const btn_parar = document.querySelector(".parar")
+
+        if(!executando) {
+            btn_executar.removeAttribute("disabled")
+            btn_resertar.removeAttribute("disabled")
+            btn_parar.setAttribute("disabled", "")
+           
+        } else {
+            btn_executar.setAttribute("disabled", "")
+            btn_resertar.setAttribute("disabled", "")
+            btn_parar.removeAttribute("disabled")
+        }
+    }
     
     async lerComandos() {
 
@@ -1233,12 +1250,13 @@ class Linguagem {
         // DOM
         this.mostrarBarraRolagem()
         this.setPosCabecote()
+        this.statusBtnExecutar(true)
 
         // Coloca o estado inicial declarado na nontupla
         let estado = this.obj_nontuplas.estado_inicial.join('').trim()
         
         // Executa os comandos
-        while(contador >= 0 && totRodada <= 3000) {
+        while(contador >= 0 && totRodada <= 3000 && !this.is_parar) {
             let entrada = this.el_entrada[contador].innerText.trim()
 
             entrada = entrada.replace(SimbolosEspeciais.delimitador.simbolo2, SimbolosEspeciais.delimitador.simbolo1)
@@ -1277,7 +1295,8 @@ class Linguagem {
 
         this.mostrarBarraRolagem();
         this.setPosCabecote()
-        this.setValidarCadeia()
+        this.setValidarCadeia(this.is_parar)
+        this.statusBtnExecutar(false)
     }
 
     mostrarValidCadeia(esconder =  false) {
@@ -1290,7 +1309,7 @@ class Linguagem {
         }
     }
 
-    setValidarCadeia() {
+    setValidarCadeia(is_parar = false) {
         const saida = document.querySelector("#estado-display")
         const span = document.querySelector("#cadeia-info")
 
@@ -1300,7 +1319,7 @@ class Linguagem {
             span.classList.add("aceita")
             span.classList.remove("rejeicao")
         } else {
-            span.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>&nbsp;Rejeição!'
+            span.innerHTML = `<i class="fa-solid fa-circle-xmark"></i>&nbsp;${is_parar ? "Interrompido" : "Rejeição"}`
             span.classList.add("rejeicao")
             span.classList.remove("aceita")
         }

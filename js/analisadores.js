@@ -474,10 +474,11 @@ class TabelaTransicao {
 
                 if(coluna.classList.contains('cmd-linha')) {
                     coluna.innerText = tot_linha + 1
+                } else {
+                    this.codigoFormatadoChange(coluna)
                 }
 
                 this.ultimaLinhaEvento(linha, coluna, tot_linha)
-                this.codigoFormatadoChange(coluna)
             }
 
             if(tot_linha > 0) {

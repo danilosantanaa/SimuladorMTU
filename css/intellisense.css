@@ -12,7 +12,8 @@
 }
 
 .cmd-direcao {
-    color: var(--color3);
+    color: green;
+    font-weight: bolder;
 }
 
 

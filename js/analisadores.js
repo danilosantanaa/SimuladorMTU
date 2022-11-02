@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento, trocarValores, SimbolosEspeciais, moverCursorContentEditableFinal } from "./ManipularDOM.js"
 import { abrirFecharConsole, setTotErro, setTotAvisos, setConsoleLogs} from "./console.js"
 /**
  *
@@ -20,12 +20,16 @@ class ExpressaoRegular {
     constructor() {
         this.Validadores = {
             VALIDADOR_CONJUNTOS: /^(\s*[a-zA-Z0-9\>]+\s*)(\,\s*[a-zA-Z0-9\>]+\s*)*$/g,
-            VALIDAR_PONTEIRO: /^[a-zA-Z0-9]+$/g,
-            VALIDAR_COMANDOS: /^([a-zA-Z0-9]+)\s+([a-zA-Z0-9\>\Б\►]+)\s+([R|L|P])$/g
+            VALIDAR_PONTEIRO: /^q[0-9]+$/g,
+            VALIDAR_COMANDOS: /^(q[0-9]+)\s+([a-zA-Z0-9\>\Б\►])\s+([R|L|P])$/g
         }
 
         this.ExtrairValores = {
             EXTRAIR_ELEMENTO_CONJUNTO: /[a-zA-Z0-9\>]+/g
+        }
+
+        this.Substituicao = {
+            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►]\s+)?([R|L|P]?)\s*$/g
         }
     }
 }
@@ -449,23 +453,91 @@ class TabelaTransicao {
         // TECLAS
         this.TECLA_TAB = 9
         this.TECLA_ENTER = 13
+        this.DELETE = 8
 
         this.el_primeiraLinha = undefined
+
+        this.isCtrlPrecionado = false
+        this.IsLetraA = false
     }
 
     get ultima_linha() {
         return this.getLinhas().length
     }
 
+
     monitorandoTabela() {
+        let tot_linha = 0
         for(let linha of this.getLinhas()) {
             for(let coluna of this.getColuna(linha)) {
-                this.ultimaLinhaEvento(linha, coluna)
+                this.ultimaLinhaEvento(linha, coluna, tot_linha)
+                this.codigoFormatadoChange(coluna)
             }
+            tot_linha++
         }
+
+        // const linhas = this.getLinhas()
+        // if(linhas.length > 1) {
+        //     this.addEventoRemoverUltimaLinha(linhas, tot_linha)
+        // }
     }
 
-    ultimaLinhaEvento(linha, coluna) {
+    codigoFormatadoChange(td) {
+
+        const callback = () => {
+            let exRegula = new ExpressaoRegular()
+            td.innerHTML = td.innerText.replace(exRegula.Substituicao.SUBSTITUIR_COMANDOS, "<span class='cmd-estado'>$1</span> <span class='cmd-transicao'>$3</span> <span class='cmd-direcao'>$4</span>")
+        }
+
+        td.addEventListener("keyup", (e) => {
+            if(!this.isCtrlPrecionado) {
+                this.isCtrlPrecionado = e.keyCode == 17
+            } 
+
+            if(this.isCtrlPrecionado && !this.IsLetraA) {
+                this.IsLetraA = e.keyCode == 65
+            } else if(this.isCtrlPrecionado) {
+                this.isCtrlPrecionado = false
+            }
+
+            if(this.isCtrlPrecionado && this.IsLetraA) {
+                this.isCtrlPrecionado = false
+                this.IsLetraA = false
+            }else if(e.keyCode >= 48 && e.keyCode <= 126 || e.keyCode == 9) {
+                callback()
+                moverCursorContentEditableFinal(td)
+            }
+        })
+
+        td.addEventListener("focus", callback)
+        td.addEventListener("blur", () => {
+            callback()
+        })
+
+    }
+
+    // addEventoRemoverUltimaLinha(linhas, tot) {
+    //     const td = linhas[linhas.length - 1].querySelector("[estado-apontador]")
+
+    //     const listener = e => {
+    //         if(td.innerText.trim() == "" && e.keyCode == this.DELETE) {
+    //             try {
+    //                 this.el_tbody.removeChild(linhas[linhas.length - 1])
+    //                 td.removeEventListener("keydown", listener, false)
+    //                 this.monitorandoTabela()
+    //             } catch(e) {
+    //                 console.log(e)
+    //             }
+    //         }
+    //     }
+
+    //     if(tot == linhas.length -1) {
+    //         td.addEventListener("keydown", listener, false)
+    //     }
+
+    // }
+
+    ultimaLinhaEvento(linha, coluna, tot) {
         const obj_escopo = this
 
         if(this.isUltimaLinha(coluna)) {
@@ -474,7 +546,7 @@ class TabelaTransicao {
                 if(e.keyCode == obj_escopo.TECLA_TAB || e.keyCode == obj_escopo.TECLA_ENTER) {
                     e.preventDefault()
                     
-                    const el_nova_linha = obj_escopo.gerarNovaLinha()
+                    const el_nova_linha = obj_escopo.gerarNovaLinha(tot)
                     obj_escopo.el_tbody.appendChild(el_nova_linha)
                     obj_escopo.getColuna(el_nova_linha)[1].focus()
 
@@ -495,13 +567,13 @@ class TabelaTransicao {
         }
     }
 
-    gerarNovaLinha() {
+    gerarNovaLinha(tot) {
        const tr = criarElemento("tr")
        const total_nontuplas = this.analisadorSintaticoNontupla.getNontupla().alfaberto_fita.length + 1
 
        for(let contador = 0; contador <= total_nontuplas; contador++) {
             if(contador == 0) { // gera o td com o número da linha
-                tr.appendChild(criarElemento("td", this.ultima_linha + 1, {
+                tr.appendChild(criarElemento("td", tot + 2, {
                     class: "cmd-linha"
                 }))
 

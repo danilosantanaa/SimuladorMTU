@@ -7,12 +7,12 @@
 }
 
 .cmd-transicao {
-    color: var(--color5);
+    color: var(--color4);
     font-weight: bolder;
 }
 
 .cmd-direcao {
-    color: var(--color2);
+    color: var(--color3);
 }
 
 
@@ -36,3 +36,4 @@
 td[estado-apontador] {
     color: blue;
 }
+/* 17 65 */

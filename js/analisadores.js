@@ -913,6 +913,7 @@ class AnalisadorSintatico {
             this.verificarDeclaracaoTodosEstados()
             this.verificarErrosMovimentadorParada()
             this.verificarErrosEstadoInicial()
+            this.verificarErrosEstadoFinal()
         }
     }
 
@@ -1098,7 +1099,11 @@ class AnalisadorSintatico {
     }
 
     verificarErrosEstadoFinal() {
-        const estado_final = this.analisadorSematico.filter(cmd => cmd.estado == this.obj_nontuplas.estado_final.join('').trim())
+        const estado_final = this.analisadorSematico.comandosList.filter(cmd => cmd.estado == this.obj_nontuplas.estado_final.join('').trim() && cmd.movimentador == Dicionario.MOVER.P)
+
+        if(estado_final.length == 0) {
+            this.setAvisos(`Não foi encontrado o estado final "${this.obj_nontuplas.estado_final.join('')}" codificado. Por favor codifique o estado final`)
+        }
     }
 
     verificarDeclaracaoTodosEstados() {
@@ -1233,6 +1238,7 @@ class Linguagem {
         this.mostrarBarraRolagem()
         this.setPosCabecote()
         this.setErrosConsoles()
+        this.mostrarValidCadeia(true)
         while(contador >= 0 && this.is_executar && totRodada <= 3000) {
             let entrada = this.el_entrada[contador].innerText.trim()
 
@@ -1272,6 +1278,35 @@ class Linguagem {
 
         this.mostrarBarraRolagem();
         this.setPosCabecote()
+        this.setValidarCadeia()
+
+    }
+
+    mostrarValidCadeia(esconder =  false) {
+        const span = document.querySelector("#cadeia-info")
+
+        if(span.style.display.trim() == 'flex' || esconder) {
+            span.style.display = 'none'
+        } else {
+            span.style.display = 'flex'
+        }
+    }
+
+    setValidarCadeia() {
+        const saida = document.querySelector("#estado-display")
+        const span = document.querySelector("#cadeia-info")
+
+       this.mostrarValidCadeia()
+        if(saida.innerText.trim() == this.obj_nontuplas.estado_final.join('').trim()) {
+            span.innerHTML = '<i class="fa-solid fa-circle-check"></i>&nbsp;Aceita!'
+            span.classList.add("aceita")
+            span.classList.remove("rejeicao")
+        } else {
+            span.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>&nbsp;Rejeição!'
+            span.classList.add("rejeicao")
+            span.classList.remove("aceita")
+        }
+
     }
 
     setEntrada(pos, caracter) {

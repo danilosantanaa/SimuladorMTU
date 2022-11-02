@@ -30,7 +30,7 @@ class ExpressaoRegular {
         }
 
         this.Substituicao = {
-            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►]\s+)?([R|L|P]?)\s*$/g
+            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►])?(\s*)([R|L|P]?)\s*$/g
         }
     }
 }
@@ -495,7 +495,7 @@ class TabelaTransicao {
 
         const callback = () => {
             let exRegula = new ExpressaoRegular()
-            td.innerHTML = td.innerText.replace(exRegula.Substituicao.SUBSTITUIR_COMANDOS, "<span class='cmd-estado'>$1</span> <span class='cmd-transicao'>$3</span> <span class='cmd-direcao'>$4</span>")
+            td.innerHTML = td.innerText.replace(exRegula.Substituicao.SUBSTITUIR_COMANDOS, "<span class='cmd-estado'>$1</span> <span class='cmd-transicao'>$3</span> <span class='cmd-direcao'>$5</span>")
         }
 
         td.addEventListener("keyup", (e) => {
@@ -816,7 +816,7 @@ class AnalisadorLexico {
                     } else {
                         estado_atual = ESTADO.Q0
                         pos--
-                        this.setErros(`A cadeia ${cadeia} não foi reconhecida!`, tot_linha, tot_coluna)
+                        this.setErros(`A cadeia "${cadeia}" não foi reconhecida!`, tot_linha, tot_coluna)
                         cadeia = ""
                     }
                 
@@ -869,7 +869,7 @@ class AnalisadorLexico {
     }
 
     isIguinorarCaracter(caracter) {
-        return caracter == '\s' || caracter == '\r' || caracter == '\b' || caracter == ' '
+        return caracter[0] == '\s' || caracter[0] == '\r' || caracter[0] == '\b' || caracter[0] == ' ' || caracter == " "
     }
 
     isNumero(caracter) {

@@ -63,40 +63,53 @@ class AnalisadorSintaticoNonTuplas {
 
     eventosFocusOut() {
         this.el_conjunto_estado.addEventListener("focusout", () => {
+            this.tirarEspacos(this.el_conjunto_estado)
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela(!this.is_tabela_gerada)
         })
         
         this.el_alfaberto.addEventListener("focusout", () => {
+            this.tirarEspacos(this.el_alfaberto)
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela()
         })
         
         this.el_estado_inicial.addEventListener("focusout", () => {
+            this.tirarEspacos(this.el_estado_inicial)
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_estado_final.addEventListener("focusout", () => {
-            this.estado_final
+            this.tirarEspacos(this.el_estado_final)
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_estado_nao_final.addEventListener("focusout", () => {
+            this.tirarEspacos(this.el_estado_nao_final)
             this.preencherCamposAutomaticamente()
             this.verificarLocaisNoErros()
             this.gerarTabela(!this.is_tabela_gerada)
         })
 
         this.el_alfaberto_fita.addEventListener("focusout", () => {
+            this.tirarEspacos(this.el_alfaberto_fita)
             this.verificarLocaisNoErros()
             this.gerarTabela()
         })
+    }
+
+    tirarEspacos(elem) {
+        if(elem.innerText.trim().length > 0) {
+            elem.innerText = elem.innerText.trim()
+        } else {
+            elem.innerText = " "
+        }
     }
 
     verificarLocaisNoErros() {

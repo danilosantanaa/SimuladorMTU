@@ -1,3 +1,7 @@
+# Executar o projeto
+Para executar basta [Apertar Aqui](https://danilosantanaa.github.io/SimuladorMTU/) e rodar. É necessário que o seu browser rode a linguagem JavaScript. 
+
+
 # Funcionamento geral do simulador
 
 O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por fim faz um processo de transpirador, pega o código da tabela e transforma em um array de instrução.

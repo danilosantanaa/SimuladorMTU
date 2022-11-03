@@ -3,7 +3,6 @@
 O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por fim faz um processo de transpirador, pega o código da tabela e transforma e um array de instrução.
  
  # Modo de Usar
- 
  ## Preencher a Nontuplas:
  ![image](https://user-images.githubusercontent.com/38994152/199786731-ba42e8e8-1e17-4beb-96c0-1b0f6474e54a.png)
 
@@ -23,12 +22,22 @@ O Estado sempre deve ser de q0 até qN, o pré-fixo pode ser "q" ou "Q"
 ![image](https://user-images.githubusercontent.com/38994152/199790016-2bd48f6b-8f1d-4f40-9f7f-455d84e32c23.png): Controla a velocidade de execução dos comandos
 
 ## Fita
-Aqui será a entrada e saída do simulador. Para entrar com dados, basta selecionar uma célula e preencher com um caracter que deseja ler. Só é permitido um único caracteres e se caso quiser passar de uma célula de maneira rápida, basta apertar as tecla TAB para a próxima cédula e SHIFT + TAB para célula anterior.
+Aqui será a entrada e saída do simulador. Para entrar com dados, basta selecionar uma célula e preencher com um caracter que deseja ler. Só é permitido um único caracteres em cada célula e se caso quiser passar de uma célula para outra de maneira rápida, basta apertar as tecla TAB para ir para a próxima cédula e SHIFT + TAB para ir para a célula anterior.
 
 ## Cabeçote
-Quando executa os comandos, o cabeçote da foto abaixo, vai indo de célula em célula, colocando ou tirando caracter de acordo com a programação que foi feita na tabela.
+Quando executar os comandos, o cabeçote da foto abaixo vai indo de célula em célula, colocando ou retirando caracter de acordo com a programação que foi feita na tabela.
 
 ![image](https://user-images.githubusercontent.com/38994152/199788847-d4406f24-c4dd-459f-959c-4d362b0eeba0.png)
+
+## Console 
+O Console funcionar como alerta, será nessa tela que será mostrado erros sintático na construções das instruções e avisos. No console, tem dois icones, de erros e aviso, mostrará a quantidade de erros e avisos encontrado na execuções das instruções. 
+
+![image](https://user-images.githubusercontent.com/38994152/199791220-54fc7609-41e5-4e06-905e-69753571e42d.png): Erros ou Avisos
+
+![image](https://user-images.githubusercontent.com/38994152/199791491-ae797298-6a31-44a0-a09d-3b473ac10ef6.png): Fechar ou Abre o console
+
+### Tela do Console
+![image](https://user-images.githubusercontent.com/38994152/199791818-6046cad5-9678-444f-a40f-2d1f3065864c.png)
 
 ## Um Comando demo para rodar o simulador.
 ![image](https://user-images.githubusercontent.com/38994152/199786491-79cb14e6-d0aa-4348-b20a-f083bc126dcd.png)

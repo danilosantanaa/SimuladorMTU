@@ -1,5 +1,5 @@
 # Executar o projeto
-Para executar basta [Apertar Aqui](https://danilosantanaa.github.io/SimuladorMTU/){:target="_blank"} e rodar. É necessário que o seu browser rode a linguagem JavaScript. 
+Para executar basta [Apertar Aqui](https://danilosantanaa.github.io/SimuladorMTU/){target="_blank"} e rodar. É necessário que o seu browser rode a linguagem JavaScript. 
 
 
 # Funcionamento geral do simulador

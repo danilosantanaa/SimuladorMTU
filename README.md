@@ -27,5 +27,5 @@ Quando executa os comandos, o cabeçote da foto abaixo, vai indo de célula em c
 
 ![image](https://user-images.githubusercontent.com/38994152/199788847-d4406f24-c4dd-459f-959c-4d362b0eeba0.png)
 
-## Um Comando demo para rodar os simulador.
+## Um Comando demo para rodar o simulador.
 ![image](https://user-images.githubusercontent.com/38994152/199786491-79cb14e6-d0aa-4348-b20a-f083bc126dcd.png)

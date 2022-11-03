@@ -1,7 +1,6 @@
 # Funcionamento geral do simulador
 
-O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por faz um processo de transpirador, pega o código da tabela e transforma e um array de instrução.
- 
+O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por fim faz um processo de transpirador, pega o código da tabela e transforma e um array de instrução.
  
  # Modo de Usar
  
@@ -15,9 +14,13 @@ O Estado sempre deve ser de q0 até qN, o pré-fixo pode ser "q" ou "Q"
 ![image](https://user-images.githubusercontent.com/38994152/199786858-792f48b1-bb94-40ca-bd2d-5a05be2ab5cb.png)
 
 ## Botões de Controles
-Esse são os botões que executa, para a execução quando o simulador estiver executandos os comandos, reserta os dados colocado na fita e por último, altera a velocidade do cabeçote de fita.
+![image](https://user-images.githubusercontent.com/38994152/199790211-7de7292e-00fd-4258-b71f-0a6326abcce0.png): Executa os comandos
 
-![image](https://user-images.githubusercontent.com/38994152/199787483-15fd77be-0b78-4e7d-af57-b90d6c2868fe.png)
+![image](https://user-images.githubusercontent.com/38994152/199789779-d637e523-9e1c-46ba-8d8c-98b738d4101f.png): Parar a execução
+
+![image](https://user-images.githubusercontent.com/38994152/199789884-a455752e-fc1f-447f-8a0b-079815283f60.png): Reserta os caracteres colocado na fita de entrada e sáida
+
+![image](https://user-images.githubusercontent.com/38994152/199790016-2bd48f6b-8f1d-4f40-9f7f-455d84e32c23.png): Controla a velocidade de execução dos comandos
 
 ## Fita
 Aqui será a entrada e saída do simulador. Para entrar com dados, basta selecionar uma célula e preencher com um caracter que deseja ler. Só é permitido um único caracteres e se caso quiser passar de uma célula de maneira rápida, basta apertar as tecla TAB para a próxima cédula e SHIFT + TAB para célula anterior.

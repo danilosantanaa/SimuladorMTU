@@ -1,12 +1,12 @@
 # Funcionamento geral do simulador
 
-O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por fim faz um processo de transpirador, pega o código da tabela e transforma e um array de instrução.
+O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semântica e por fim faz um processo de transpirador, pega o código da tabela e transforma em um array de instrução.
  
  # Modo de Usar
  ## Preencher a Nontuplas:
  ![image](https://user-images.githubusercontent.com/38994152/199786731-ba42e8e8-1e17-4beb-96c0-1b0f6474e54a.png)
 
-Muito importante que coloque o alfaberto de fita, porque se caso colocar depois a programação feita na tabela será resertada.
+Muito importante que coloque todos os alfaberto de fita, porque se caso colocar depois, a programação feita na tabela será resertada. Verifique antes se há algum alfaberto de fita marcador e coloque. Quando preencher novamente o alfaberto de fita ou alfaberto, a tabela será resertada. 
 O Estado sempre deve ser de q0 até qN, o pré-fixo pode ser "q" ou "Q"
 
 ## Codificar a tabela

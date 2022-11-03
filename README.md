@@ -1,3 +1,4 @@
 # Funcionamento geral do simulador
 
-De forma resumida, o simulador foi construido usando alguns conceitos de compiladores, analisadores léxicos, sintáticos e semanticos 
+O simulador foi construído usando conceitos de linguagens formais: autômato finitos determinístico (AFD) e gramática livre de contexto (GLC). Foi dividida em fase como: análise lexica, sintática e semàntica e por faz um processo de transpirador, pega o código da tabela e transforma e um array de instrução.
+ 

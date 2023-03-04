@@ -62,8 +62,13 @@ export class GerarTabelaTransicao {
             this.preecharTabelaComCodigosDoArquivo(comandos_convertido)
             
             
-        } catch(e) {
-            console.error(e)
+        }
+        catch(e) {
+            if(e instanceof SyntaxError) {
+                console.error(`Arquivo com conteúdo não suportado...`)
+            } else {
+                console.error(e)
+            }
         }
     }
 

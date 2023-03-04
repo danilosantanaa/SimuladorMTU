@@ -1,5 +1,5 @@
 import * as configuracoes from "./configuracoes.js"
-import { moverCursorContentEditableFinal, criarElemento, adicionarElemento } from "./manipularDOM.js"
+import { moverCursorContentEditableFinal, criarElemento, adicionarElemento } from "./manipularElementHTML.js"
 import { Nontupla, ValidadorNonTuplas } from "./validadorNontuplas.js"
 
 /**

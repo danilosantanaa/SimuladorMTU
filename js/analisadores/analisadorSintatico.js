@@ -1,6 +1,6 @@
 import * as configuracoes from "../configuracoes.js"
 import { AnalisadorLexico } from "./analisadorLexico.js"
-import {AnalisadorSemantico } from "./analisadorSemantico.js"
+import { AnalisadorSemantico } from "./analisadorSemantico.js"
 
 export class AnalisadorSintatico {
     constructor(obj_nontuplas) {

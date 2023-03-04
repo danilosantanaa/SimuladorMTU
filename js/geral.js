@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento } from "./manipularElementHTML.js"
 import { SIMBOLOS_ESPECIAIS  } from './configuracoes.js'
 import { abrirFecharConsole } from "./console.js"
 

@@ -1,4 +1,4 @@
-import { criarElemento, adicionarElemento } from "./manipularDOM.js"
+import { criarElemento, adicionarElemento } from "./manipularElementHTML.js"
 
 /** Responsavel por fazer a manipulação do console */
 const cmd =  document.querySelector(".cli-content")

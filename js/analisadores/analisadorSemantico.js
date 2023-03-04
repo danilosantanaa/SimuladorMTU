@@ -1,19 +1,11 @@
-import { Nontupla } from "../validadorNontuplas.js"
-import { AnalisadorSintatico } from "./analisadorSintatico.js"
-
 export class AnalisadorSemantico {
-    /**
-     * @param {Nontupla} obj_nontupla
-     */
-    constructor(obj_nontupla) {
+    constructor() {
         this.estado_apontador = null
         this.estado = null
         this.alfaberto_fita = null
         this.movimentador = null
-
         this.num_linha = 0
         this.num_coluna = 0
-
         this.estado_apontador_declarado = new Map()
         this.estado_inicial_declarado = new Map()
         this.estado_final_declarado = new Map()
@@ -21,8 +13,7 @@ export class AnalisadorSemantico {
         this.comandosList = []
         this.movimentadorList = []
 
-        /** @type {AnalisadorSintatico} */
-        const analisadorSintatico = new AnalisadorSintatico(obj_nontupla, this)
+        this.matrAdjacente = new Map()
     }
 
     setEstado(estado, linha, coluna) {
@@ -30,20 +21,17 @@ export class AnalisadorSemantico {
         this.num_linha = linha
         this.num_coluna = coluna
     }
-
     setAlfaberto(alfaberto_fita, linha, coluna) {
         this.alfaberto_fita = alfaberto_fita.trim()
         this.num_linha = linha
         this.num_coluna = coluna
     }
-
     setMovimentador(movimentador, linha, coluna) {
         this.movimentador = movimentador.trim()
         this.num_linha = linha
         this.num_coluna = coluna
         this.setMovimentadorList()
     }
-
     setComandos() {
         this.comandosList.push({
             estado: this.estado,
@@ -53,7 +41,6 @@ export class AnalisadorSemantico {
             coluna: this.num_coluna
         })
     }
-
     setMovimentadorList() {
         this.movimentadorList.push({
             movimentador: this.movimentador,
@@ -61,5 +48,4 @@ export class AnalisadorSemantico {
             coluna: this.num_coluna
         })
     }
-
 }

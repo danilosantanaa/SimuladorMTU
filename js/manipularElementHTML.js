@@ -27,6 +27,7 @@ function adicionarElemento(elementoPai, elementoFilho) {
     elementoPai.append(elementoFilho)
 }
 
+
 function moverCursorContentEditableFinal(elem) {
     let sel = window.getSelection()
     sel.selectAllChildren(elem)

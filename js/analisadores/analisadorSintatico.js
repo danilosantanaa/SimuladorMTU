@@ -1,14 +1,28 @@
 import * as configuracoes from "../configuracoes.js"
+import { Nontupla } from "../validadorNontuplas.js"
 import { AnalisadorLexico } from "./analisadorLexico.js"
 import { AnalisadorSemantico } from "./analisadorSemantico.js"
 
 export class AnalisadorSintatico {
-    constructor(obj_nontuplas) {
+
+    /**
+     * @param {Nontupla} obj_nontuplas
+     * @param {AnalisadorSemantico} analisadorSematico
+     *  */
+    constructor(obj_nontuplas, analisadorSematico) {
+
+        /**@type {AnalisadorLexico} */
         this.analisadorLexico = new AnalisadorLexico()
+
+        /**@type {Nontupla} */
         this.obj_nontuplas = obj_nontuplas
+
+        /**@type {Array} */
         this.comandos = []
 
+        /**@type {Number} */
         this.lookahead = 0
+        
         this.errosSintaticos = []
         this.avisosSintaticos = []
 
@@ -16,7 +30,7 @@ export class AnalisadorSintatico {
         this.analisadorLexico.gerarTokens()
 
         // Analisador sematico
-        this.analisadorSematico = new AnalisadorSemantico()
+        this.analisadorSematico = analisadorSematico
 
         if(this.analisadorLexico.errorList.length == 0) {
             this.programa()

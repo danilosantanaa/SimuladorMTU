@@ -1,0 +1,78 @@
+r = leitura atual
+n = próxima leitura
+
+qo(r)
+	se r == ">"
+		n = RIGHT()
+		q0(n)
+	senao se r == "1"
+		n = RIGHT()
+		q1(n)
+	senao se r == "0"
+		n = RIGHT()
+		q4(n)
+	senao
+		rejeicao(r)
+
+q1(r)
+	se r == "0"
+		n = RIGHT()
+		q2(n)
+	senao se r == "1"
+		n = RIGHT()
+		q1(n)
+	senao 
+		rejeicao(r)
+
+q2(r)
+	se r == "2"
+		n = LEFT()
+		q3(n)
+	senao se r == "Y"
+		n = RIGHT()
+		q2(n)
+	senao
+		rejeicao(r)
+
+q3(r)
+	se r == "0"
+		n = LEFT()
+		q3(n)
+	senao se r == "1"
+		n = LEFT()
+		q3(n)
+	senao se r == "X"
+		n = RIGHT()
+		q0(n)
+	senao se r == "Y"
+		n = LEFT()
+		q3(n)
+	senao
+		rejeicao(n)
+
+q4(r)
+	se r == "1"
+		n = RIGHT()
+		q5(n)
+	senao se r == "Y"
+		n = RIGHT()
+		q4(n)
+	senao 
+		rejeicao(r)
+
+q5(r)
+	if r == "0"
+		n = RIGHT()
+		q6(n)
+	senao
+		rejeicao()
+
+q6(r)
+	if r == "b"
+		STOP()
+		n7()
+	senao
+		rejeicao()
+
+q7()
+	return

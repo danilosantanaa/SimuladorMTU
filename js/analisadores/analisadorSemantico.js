@@ -1,5 +1,11 @@
+import { Nontupla } from "../validadorNontuplas.js"
+import { AnalisadorSintatico } from "./analisadorSintatico.js"
+
 export class AnalisadorSemantico {
-    constructor() {
+    /**
+     * @param {Nontupla} obj_nontupla
+     */
+    constructor(obj_nontupla) {
         this.estado_apontador = null
         this.estado = null
         this.alfaberto_fita = null
@@ -15,7 +21,8 @@ export class AnalisadorSemantico {
         this.comandosList = []
         this.movimentadorList = []
 
-        this.matrAdjacente = new Map()
+        /** @type {AnalisadorSintatico} */
+        const analisadorSintatico = new AnalisadorSintatico(obj_nontupla, this)
     }
 
     setEstado(estado, linha, coluna) {

@@ -57,6 +57,7 @@ export class Runtime {
     }
 
     getComandos() {
+
         return JSON.stringify({
             S: this.obj_nontuplas.conjunto_estado,
             AF: this.obj_nontuplas.alfaberto,

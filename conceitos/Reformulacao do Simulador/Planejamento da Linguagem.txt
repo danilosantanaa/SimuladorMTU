@@ -1,0 +1,76 @@
+Palavaras Reservadas
+-----------------------------
+Q --> Conjuntos de estados
+A --> Alfaberto
+S0 --> Estado Inicial
+F --> Estado Final
+R --> Estados não finais
+AF --> Alfaberto de fita
+D --> Delimitador
+B --> branco de fita
+
+
+TOKENS
+--------------------------------------
+100 ----> E
+101 ----> A
+102 ----> S0
+103 ----> F
+104 ----> NF
+105 ----> aF
+106 ----> D
+107 ----> B
+108 ----> ">"
+109 ----> "b"
+
+
+200 ----> ESTADOS
+201 ----> ALFABERTO
+203 ----> MOVIMENTADOR
+
+300 ----> MODIFICADOR "&"
+301 ----> ATRIBUIÇÃO  "="
+302 ----> VIRGULA ","
+
+
+GRAMATICA LIVRE DE CONTEXTO
+===========================================================
+E := "E="<EXPESTADO>
+A := "A="<EXPALF>
+S0 := "S0="<ESTADO>
+F := "F="<ESTADO>
+NF := "NF="<EXPESTADO>
+AF := "aF="<EXPALF>
+D := ">"
+B := "b"
+NONTUPLA := <E> | <A> | <S0> | <F> | <NF> | <AF> | <D> | <B>
+DELTA := <ESTADO><CMDS><DELTA> | &
+CMDS := <ESTADO><ALFABERTO><MODIFICADOR><SUBCMDS>
+SUBCMDS := <ESTADO><ALFABERTO><MODIFICADOR><SUBCMDS> | &
+PROGRAMA := <NONTUPLA><DELTA>
+EXPESTADO := <ESTADO><SUB_EXP>
+SUBEXPESTADO := ","<ESTADO><SUB_EXP> | &
+EXPALF := <LETRA><SUBEXPALF>
+SUBEXPALF := ","<LETRA><SUBEXPALF> | &
+
+
++---+---+----+----+----+
+ESTADO := [q|Q]<SEQ>
+SEQ := <NUMERO><SEQ>
+
+MOVIMENTADOR := R | L | P
+LETRA := [cdefghijklmnopqrstuvwxyzCGHIJKMOTUVWXYZ+-*/]
+NUMERO := [0123456789]
+MODIFICADOR -> &
+
+
+-----
+REGEX
+
+ESTADO := /[q|Q][0-9]+/
+ALFABERTO := /[c-zCG-KMOT-Z+*-/]/
+MODIFICADOR := /&/
+MOVIMENTADOR := /R|P|L/
+VIRGULA := /,/
+FIM_LINHA := /\n/
+ATRIBUICAO := /=/

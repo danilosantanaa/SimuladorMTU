@@ -1,4 +1,5 @@
-import { criarElemento, adicionarElemento, SimbolosEspeciais } from "./ManipularDOM.js"
+import { criarElemento, adicionarElemento } from "./ManipularDOM.js"
+import { SIMBOLOS_ESPECIAIS  } from './configuracoes.js'
 import { abrirFecharConsole } from "./console.js"
 
 const el_fitas = document.querySelector(".fitas")
@@ -64,10 +65,9 @@ function verificarCaracteresCedula(e) {
 
 }
 
-
 function trocarCaracteres(e) {
-    e.target.innerText = e.target.innerText.replace(/b|B/, SimbolosEspeciais.branco_fita.simbolo2)
-    e.target.innerText = e.target.innerText.replace(">", SimbolosEspeciais.delimitador.simbolo2)
+    e.target.innerText = e.target.innerText.replace(/b|B/, SIMBOLOS_ESPECIAIS.BRANCO_DE_FITA.SIMBOLO_NIVEL_DISPLAY)
+    e.target.innerText = e.target.innerText.replace(">", SIMBOLOS_ESPECIAIS.DELIMITADOR.SIMBOLO_NIVEL_DISPLAY)
 }
 
 abrirFecharConsole()

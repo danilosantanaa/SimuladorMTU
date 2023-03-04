@@ -1,0 +1,150 @@
+{
+  "S": [
+    "q0",
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6",
+    "q7"
+  ],
+  "AF": [
+    "0",
+    "1",
+    "2"
+  ],
+  "S0": [
+    "q0"
+  ],
+  "F": [
+    "q7"
+  ],
+  "R": [
+    "q0",
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6"
+  ],
+  "AFF": [
+    "0",
+    "1",
+    "2",
+    "X",
+    "Y",
+    ">",
+    "b"
+  ],
+  "b": "b",
+  "d": ">",
+  "delta": [
+    {
+      "estado_apontador": "q0",
+      "estado": "q4",
+      "alfaberto_fita_header": "0",
+      "alfaberto_fita_subs": "0",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q0",
+      "estado": "q1",
+      "alfaberto_fita_header": "1",
+      "alfaberto_fita_subs": "X",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q0",
+      "estado": "q0",
+      "alfaberto_fita_header": ">",
+      "alfaberto_fita_subs": ">",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q1",
+      "estado": "q2",
+      "alfaberto_fita_header": "0",
+      "alfaberto_fita_subs": "0",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q1",
+      "estado": "q1",
+      "alfaberto_fita_header": "1",
+      "alfaberto_fita_subs": "1",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q2",
+      "estado": "q3",
+      "alfaberto_fita_header": "2",
+      "alfaberto_fita_subs": "Y",
+      "movimentador": "L"
+    },
+    {
+      "estado_apontador": "q2",
+      "estado": "q2",
+      "alfaberto_fita_header": "Y",
+      "alfaberto_fita_subs": "Y",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q3",
+      "estado": "q3",
+      "alfaberto_fita_header": "0",
+      "alfaberto_fita_subs": "0",
+      "movimentador": "L"
+    },
+    {
+      "estado_apontador": "q3",
+      "estado": "q3",
+      "alfaberto_fita_header": "1",
+      "alfaberto_fita_subs": "1",
+      "movimentador": "L"
+    },
+    {
+      "estado_apontador": "q3",
+      "estado": "q0",
+      "alfaberto_fita_header": "X",
+      "alfaberto_fita_subs": "X",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q3",
+      "estado": "q3",
+      "alfaberto_fita_header": "Y",
+      "alfaberto_fita_subs": "Y",
+      "movimentador": "L"
+    },
+    {
+      "estado_apontador": "q4",
+      "estado": "q5",
+      "alfaberto_fita_header": "1",
+      "alfaberto_fita_subs": "1",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q4",
+      "estado": "q4",
+      "alfaberto_fita_header": "Y",
+      "alfaberto_fita_subs": "Y",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q5",
+      "estado": "q6",
+      "alfaberto_fita_header": "0",
+      "alfaberto_fita_subs": "0",
+      "movimentador": "R"
+    },
+    {
+      "estado_apontador": "q6",
+      "estado": "q7",
+      "alfaberto_fita_header": "b",
+      "alfaberto_fita_subs": "b",
+      "movimentador": "P"
+    }
+  ]
+}

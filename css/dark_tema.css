@@ -1,0 +1,59 @@
+:root {
+   --dk_color1: #404040;
+   --dk_color2: #7F7E7F;
+   --dk_color3: #BFBEBF;
+   --dk_color4: #BFBEBF;
+}
+
+/* Track */
+[tema="escuro"] *::-webkit-scrollbar-track {
+    background: var(--dk_color1);
+}
+
+/* Handle */
+[tema="escuro"] *::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: var(--dk_color3);
+}
+
+/* Handle on hover */
+[tema="escuro"] *::-webkit-scrollbar-thumb:hover {
+    background: var(--dk_color4);
+  }
+
+
+[tema="escuro"] body {
+    background-color: var(--dk_color2);
+}
+
+[tema="escuro"] .fitas > .cedula {
+    background-color: var(--dk_color1);
+    border-color: var(--dk_color3);
+}
+
+[tema="escuro"] .estado-atual-container > .estado {
+    background-color: var(color2);
+    border-color: var(--dk_color3);
+}
+
+[tema="escuro"] .entrada-dados {
+    background-color: var(--dk_color1);
+}
+
+[tema="escuro"] .entrada {
+    background-color: var(--dk_color1);
+}
+
+[tema="escuro"] .nontuplas, 
+[tema="escuro"] .inputs,
+[tema="escuro"] .entrada > .nontuplas > .inputs > label {
+    color: var(--dk_color4);
+}
+
+[tema="escuro"] .nontuplas {
+    background-color: var(--dk_color2);
+}
+
+[tema="escuro"] .tabela-comando {
+    background-color: var(--dk_color1);
+}

@@ -1,3 +1,12 @@
+import { SIMBOLOS_ESPECIAIS } from "./configuracoes.js"
+ 
+/**
+ * 
+ * @param {string} elemento 
+ * @param {string} valor 
+ * @param {string} propriedades 
+ * @returns {Element}
+ */
 function criarElemento(elemento, valor = null, propriedades = {}) {
     const tagElemento = document.createElement(elemento)
 
@@ -38,8 +47,8 @@ const SimbolosEspeciais = {
 
 function trocarValores(el, valor) {
     el.innerText = valor
-    el.innerText = el.innerText.replace(/b|B/, SimbolosEspeciais.branco_fita.simbolo2)
-    el.innerText = el.innerText.replace(">", SimbolosEspeciais.delimitador.simbolo2)
+    el.innerText = el.innerText.replace(/b|B/, SIMBOLOS_ESPECIAIS.BRANCO_DE_FITA.SIMBOLO_NIVEL_DISPLAY)
+    el.innerText = el.innerText.replace(">", SIMBOLOS_ESPECIAIS.DELIMITADOR.SIMBOLO_NIVEL_DISPLAY)
 }
 
 export {

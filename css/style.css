@@ -215,6 +215,7 @@ main {
     border: 1px solid rgba(0, 0, 0, 0.466);
 }
 
+/* FORMATAÇÃO DO BOTÕES */
 .entrada-dados .btn {
     color: white;
     background-color: #cecece;
@@ -223,6 +224,14 @@ main {
 .entrada-dados .btn.executar {
     background-color: green;
     border-color: rgb(1, 66, 1);
+}
+
+.entrada-dados .btn.salvar.pendente {
+    background-color: blue;
+}
+
+.entrada-dados .btn.abrir {
+    background-color: var(--color1);
 }
 
 .entrada-dados .btn.executar:hover {

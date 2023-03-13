@@ -1,10 +1,10 @@
 Palavaras Reservadas
 -----------------------------
-Q --> Conjuntos de estados
+Q --> Conjuntos de STATEs
 A --> Alfaberto
-S0 --> Estado Inicial
-F --> Estado Final
-R --> Estados não finais
+S0 --> STATE Inicial
+F --> STATE Final
+R --> STATEs não finais
 AF --> Alfaberto de fita
 D --> Delimitador
 B --> branco de fita
@@ -24,7 +24,7 @@ TOKENS
 109 ----> "b"
 
 
-200 ----> ESTADOS
+200 ----> STATES
 201 ----> ALFABERTO
 203 ----> MOVIMENTADOR
 
@@ -35,42 +35,38 @@ TOKENS
 
 GRAMATICA LIVRE DE CONTEXTO
 ===========================================================
-E := "E="<EXPESTADO>
-A := "A="<EXPALF>
-S0 := "S0="<ESTADO>
-F := "F="<ESTADO>
-NF := "NF="<EXPESTADO>
-AF := "aF="<EXPALF>
-D := ">"
-B := "b"
-NONTUPLA := <E> | <A> | <S0> | <F> | <NF> | <AF> | <D> | <B>
-DELTA := <ESTADO><CMDS><DELTA> | &
-CMDS := <ESTADO><ALFABERTO><MODIFICADOR><SUBCMDS>
-SUBCMDS := <ESTADO><ALFABERTO><MODIFICADOR><SUBCMDS> | &
-PROGRAMA := <NONTUPLA><DELTA>
-EXPESTADO := <ESTADO><SUB_EXP>
-SUBEXPESTADO := ","<ESTADO><SUB_EXP> | &
-EXPALF := <LETRA><SUBEXPALF>
-SUBEXPALF := ","<LETRA><SUBEXPALF> | &
+E := "{{E}}"<ASSIGMENT><EXPSTATES> //OK
+A := "{{A}}"<ASSIGMENT><EXPALPHABET>
+S0 := "{{S0}}"<ASSIGMENT><STATE>
+F := "{{F}}"<ASSIGMENT><STATE>
+NF := "{{NF}}"<ASSIGMENT><EXPSTATES>
+AF := "{{AF}}<ASSIGMENT><EXPRRIBBONALPHABET><D><B>
+D := "{{>}}"
+B := "{{b}}"
+NONTUPLA := <E><A><S0><F><NF><AF><D><B>
+DELTA := <STATE><CMDS><DELTA> | &
+CMDS := <STATE><ALPHABET><MODIFIER><ALPHABET><SUBCMDS>
+SUBCMDS := <STATE><ALPHABET><MODIFIER><ALPHABET><SUBCMDS> | &
+
+
+PROGRAM := <NONTUPLA><DELTA>
+
+
+EXPSTATES := <STATE><SUBEXPSTATE> // OK
+SUBEXPSTATE := <COMMA><STATE><SUBEXPSTATE> | & // OK
+
+EXPALPHABET := <ALPHABET><SUBEXPALPHABET>
+SUBEXPALPHABET := <COMMA><ALPHABET><SUBEXPALPHABET> | &
 
 
 +---+---+----+----+----+
-ESTADO := [q|Q]<SEQ>
-SEQ := <NUMERO><SEQ>
+STATES := {{ STATE_ID }}
+ALPHABET := {{ ALPHABET_ID }}
+MOVER := {{ MOVER_ID }}
+MODIFIER := {{ MODIFIER_ID }}
+COMMA := {{ COMMA_ID }}
+ENDLINE := {{ENDLINE_ID }}
 
-MOVIMENTADOR := R | L | P
-LETRA := [cdefghijklmnopqrstuvwxyzCGHIJKMOTUVWXYZ+-*/]
-NUMERO := [0123456789]
-MODIFICADOR -> &
 
 
 -----
-REGEX
-
-ESTADO := /[q|Q][0-9]+/
-ALFABERTO := /[c-zCG-KMOT-Z+*-/]/
-MODIFICADOR := /&/
-MOVIMENTADOR := /R|P|L/
-VIRGULA := /,/
-FIM_LINHA := /\n/
-ATRIBUICAO := /=/

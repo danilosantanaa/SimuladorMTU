@@ -50,10 +50,11 @@ export class Lexer {
          * A table irá gerar uma marcação {N} após cada código com objetivo de mapear a posição da coluna da tabela para mostrar erros mais precisos.
          * Exemplo: q1 1 R, se tornará: q1{1} 1{1} R{1}, esse "1" indica que esse código está na primeira coluna da tabela. 
          * Essa marcação só é gerada pela tabela, e quando for gerado o arquivo, essa marcação será retirada.
+         * A primeira posição da string, irá armazenar qual dimensão da coluna, se for linha, terá "l" e se for coluna, terá "c"
          * @type {string}
          * @private
          */
-        this.columnTablePosition = ""
+        this.tablePosition = ""
 
         /**
          * Armazena pedaço de uma string quando for fazer a tokenização dos caracteres
@@ -158,7 +159,7 @@ export class Lexer {
         }
         else if(caracter == '{') {
             this.next()
-            this.__q24()
+            this.__q28()
         }
         else if(caracter == '\t') {
             this.next()
@@ -362,9 +363,22 @@ export class Lexer {
     /**
      * @private
      */
+    __q28() {
+        if(this.getCaracter() == 'l' || this.getCaracter() == 'c') {
+            this.tablePosition += this.getCaracter()
+            this.next()
+            this.__q24();
+        } else {
+            this.__reject();
+        }
+    }
+
+    /**
+     * @private
+     */
     __q24() {
         if(this.isNumber(this.getCaracter())) {
-            this.columnTablePosition += this.getCaracter()
+            this.tablePosition += this.getCaracter()
             this.next()
             this.__q25()
         } else {
@@ -376,19 +390,20 @@ export class Lexer {
      * @private
      */
     __q25() {
-        if(this.getCaracter() == '}') {
-            this.next()
-            this.__q26()
-        } else if(this.isNumber(this.getCaracter())) {
-            this.columnTablePosition += this.getCaracter()
+        if(this.isNumber(this.getCaracter())) {
+            this.tablePosition += this.getCaracter()
             this.next()
             this.__q25()
         } 
+        else if(this.getCaracter() == '}') {
+            this.next();
+            this.__q26();
+        }
         else {
             this.__reject()
         }
     }
-
+    
     /**
      * @private
      */
@@ -461,11 +476,18 @@ export class Lexer {
     __assigmentColumnTablePosition() {
         const last_token = this.symbolTable.getLastToken()
 
-        last_token.columnTable = Number(this.columnTablePosition)
-        this.columnTablePosition = ""
+        const isLine = this.tablePosition.substring(0, 1) == 'l'
+        const position = this.tablePosition.substring(1)
+
+        if(isLine) {
+            last_token.lineTable = Number(position)
+        } else {
+            last_token.columnTable = Number(position)
+        }
+
+        this.tablePosition = ""
         this.substring = ""
-        this.back()
-        this.next()
+    
         this.__q0()
     }
 

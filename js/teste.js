@@ -4,8 +4,8 @@ import { SymbolTable } from "./compiler/SymbolTable.js";
 
 const symbolTable = new SymbolTable()
 const scanner = new Lexer(
-`= E q0,q1,q2,q3,q4,q5,q6,q7
-= A 0,1,2
+`E = q0,q1,q2,q3,q4,q5,q6,q7
+A = 0,1,2
 S0 = q0
 F = q7
 NF = q0,q1,q2,q3,q4,q5,q6
@@ -16,9 +16,11 @@ B = b
 
 # Aqui será um comentário
 q0
+	q1 0&b R
 q1
 	q2 0&0 R
 	q1 1&1 R
+	q2 1&1 L
 q2
 	q3 2&Y L
 	q2 Y&Y R

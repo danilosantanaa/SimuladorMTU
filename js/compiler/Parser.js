@@ -2,6 +2,7 @@ import { Lexer } from "./Lexer.js"
 import { ErrorParser } from "../erros/ErrorParser.js"
 import { SymbolTable, TokenStruct } from "./SymbolTable.js"
 import { TOKENIDENTIFIERS } from "./TokenIdentifiers.js"
+import { CodeGeneration, Instruction, StateMain } from "./CodeGeneration.js"
 
 export class Parser {
     /**
@@ -33,6 +34,13 @@ export class Parser {
          * @private
          */
         this.errorParser = new ErrorParser()
+
+        /**
+         * Geração de Códigos Final
+         */
+        this.codeGeneration = new CodeGeneration()
+        this.stateMain = null
+        this.instruction = null
     }
 
     /**
@@ -40,6 +48,9 @@ export class Parser {
      */
     parser() {
         this.__program()
+        console.log('code generation')
+        console.log('------------------------')
+        console.log(this.codeGeneration.generationFinalCode())
     }
 
     nextLine() {
@@ -55,17 +66,23 @@ export class Parser {
      * @private
      */
     __e() {
-        const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.E) {
+        try {
+            const tokenStruct = this.__getToken()
+
+            if(tokenStruct.token != TOKENIDENTIFIERS.E)
+                throw this.__reject('E')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__exprStates()
             this.__endLine()
+                
             
-        } else {
-            this.__reject('E')
+        } catch(e) {
+            console.error(e)
         }
+       
 
     }
 
@@ -73,32 +90,40 @@ export class Parser {
      * @private
      */
     __a() {
-        const tokenStruct = this.__getToken()
+        try {
+            const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.A) {
+            if(tokenStruct.token != TOKENIDENTIFIERS.A)
+                throw this.__reject('A')
+                
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__exprAlphabet()
             this.__endLine()
-        } else {
-            this.__reject('A')
-        }
 
+        } catch(e) {
+            console.error(e)
+        }
     }
 
     /**
      * @private
      */
     __s0() {
-        const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.S0) {
+        try {
+            const tokenStruct = this.__getToken()
+            
+            if(tokenStruct.token != TOKENIDENTIFIERS.S0)
+                throw this.__reject('S0')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__states()
             this.__endLine()
-        } else {
-            this.__reject('S0')
+            
+        } catch(e) {
+            console.error(e)
         }
 
     }
@@ -107,15 +132,20 @@ export class Parser {
      * @private
      */
     __f() {
-        const tokenStruct = this.__getToken()
+        try {
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.F) {
+            const tokenStruct = this.__getToken()
+    
+            if(tokenStruct.token != TOKENIDENTIFIERS.F)
+                throw this.__reject('F')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__states()
             this.__endLine()
-        } else {
-            this.__reject('F')
+        
+        } catch(e) {
+            console.error(e)
         }
 
     }
@@ -124,15 +154,19 @@ export class Parser {
      * @private
      */
     __nF() {
-        const tokenStruct = this.__getToken()
+        try {
+            const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.NF) {
+            if(tokenStruct.token != TOKENIDENTIFIERS.NF)
+                throw this.__reject('NF')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__exprStates()
             this.__endLine()
-        } else {
-            this.__reject('NF')
+        
+        } catch(e) {
+            console.error(e)
         }
 
     }
@@ -141,9 +175,14 @@ export class Parser {
      * @private
      */
     __aF() {
-        const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.AF) {
+        try {
+
+            const tokenStruct = this.__getToken()
+            
+            if(tokenStruct.token != TOKENIDENTIFIERS.AF)
+                throw this.__reject('AF')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__alphabet()
@@ -153,8 +192,9 @@ export class Parser {
             this.__comma()
             this.__bValueConst()
             this.__endLine()
-        } else {
-            this.__reject('AF')
+          
+        } catch(e) {
+            console.error(e)
         }
 
     }
@@ -163,15 +203,21 @@ export class Parser {
      * @private
      */
     __d() {
-        const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.D) {
+        try {
+
+            const tokenStruct = this.__getToken()
+            
+            if(tokenStruct.token != TOKENIDENTIFIERS.D) 
+                throw this.__recognize('D')
+
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__dValueConst()
             this.__endLine()
-        } else {
-            this.__recognize('D')
+       
+        } catch(e) {
+            console.error(e)
         }
     }
 
@@ -181,27 +227,30 @@ export class Parser {
     __dValueConst() {
         const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.D_VAL_CONST) {
-            this.__recognize(tokenStruct)
-            this.__endLine()
-        } else {
-            this.__reject('>')
-        }
+        if(tokenStruct.token != TOKENIDENTIFIERS.D_VAL_CONST)
+            throw this.__reject('>')
+    
+        this.__recognize(tokenStruct)
+        this.__endLine()
     }
 
     /**
      * @private
      */
     __b() {
-        const tokenStruct = this.__getToken()
+        try {
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.B) {
+            const tokenStruct = this.__getToken()
+            
+            if(tokenStruct.token != TOKENIDENTIFIERS.B)
+                throw this.__reject('B')
+            
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__bValueConst()
             this.__endLine()
-        } else {
-            this.__reject('B')
+        } catch(e) {
+            console.error(e)
         }
     }
 
@@ -211,11 +260,10 @@ export class Parser {
     __bValueConst() {
         const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.B_VAL_CONST) {
-            this.__recognize(tokenStruct)
-        } else {
-            this.__reject('b')
-        }
+        if(tokenStruct.token != TOKENIDENTIFIERS.B_VAL_CONST)
+            throw this.__reject('b')
+        
+        this.__recognize(tokenStruct)
     }
 
     /**
@@ -237,40 +285,78 @@ export class Parser {
      */
     __delta() {
         const tokenStruct = this.__getToken()
+    
+        try {
+            if (tokenStruct.token == TOKENIDENTIFIERS.EOF)
+                return
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.STATE) {
             this.__states()
+            const lastState = this.__getAttribute(this.__lastCaughtToken())
+            this.stateMain = new StateMain(lastState)
+
             this.__endLine()
+            this.codeGeneration.add(this.stateMain)
+            
             this.__cmds()
+
             this.__delta()
-        } else if(tokenStruct.token == TOKENIDENTIFIERS.EOF) {
-            this.__eof()
-            console.log('--- FIM ANALISE ---')
-        } else {
-            this.__reject('Esperava um estado')
-        }
+            
+        } catch(e) {
+            console.error(e)
+            return
+        } 
+        
     }
 
     /**
      * @private
      */
     __cmds() {
-        const tokenStruct = this.__getToken()
+        try {
+          
+            const tokenStruct = this.__getToken()
+            this.instruction = new Instruction()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.TAB) {
-            this.__tab()
+            if(tokenStruct.token != TOKENIDENTIFIERS.TAB)
+                throw this.__reject('TAB', false)
+
+            this.__tab();
+
             this.__states()
+            this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
+
             this.__alphabet()
+            this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+
             this.__modifier()
+
             this.__alphabet()
+            this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+
             this.__mover()
+            const lastToken = this.__lastCaughtToken()
+
+            if(lastToken.attribute == 'R') {
+                this.instruction.setRightCommand()
+            }
+
+            if(lastToken.attribute == 'L') {
+                this.instruction.setLeftCommand()
+            }
+
+            if(lastToken.attribute == 'P') {
+                this.instruction.setStopCommand()
+            }
+
             this.__endLine()
+            this.stateMain.add(this.instruction)
+
             this.__subCmds()
-        } else if(tokenStruct.token == TOKENIDENTIFIERS.EOF) {
-            this.__eof()
-            console.log('--- FIM ANALISE ---')
-        } else {
-            this.__reject('Esperava um TAB!!!')
+            
+            
+        } catch(e) {
+            console.error(e)
+            return
         }
     }
 
@@ -279,19 +365,45 @@ export class Parser {
      */
     __subCmds() {
         const tokenStruct = this.__getToken()
+        this.instruction = new Instruction()
 
         if(tokenStruct.token == TOKENIDENTIFIERS.TAB) {
+
             this.__tab()
+
             this.__states()
+            this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
+
             this.__alphabet()
+            this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+
             this.__modifier()
+
             this.__alphabet()
+            this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+
             this.__mover()
+            const lastToken = this.__lastCaughtToken()
+
+            if(lastToken.attribute == 'R') {
+                this.instruction.setRightCommand()
+            }
+
+            if(lastToken.attribute == 'L') {
+                this.instruction.setLeftCommand()
+            }
+
+            if(lastToken.attribute == 'P') {
+                this.instruction.setStopCommand()
+            }
+
             this.__endLine()
+            this.stateMain.add(this.instruction)
+
             this.__subCmds()
         }
-    }
-
+     }
+        
     /**
      * @private
      */
@@ -306,12 +418,11 @@ export class Parser {
     __exprStates() {
         const tokenStruct = this.__getToken()
         
-        if(tokenStruct.token == TOKENIDENTIFIERS.STATE) {
-            this.__states()
-            this.__subExprStates()
-        } else {
-            this.__reject('Estado')
-        }
+        if(tokenStruct.token != TOKENIDENTIFIERS.STATE)
+            throw this.__reject('Estado')
+
+        this.__states()
+        this.__subExprStates()
     }
 
     /**
@@ -333,12 +444,11 @@ export class Parser {
     __exprAlphabet() {
         const tokenStruct = this.__getToken()
 
-        if(tokenStruct.token == TOKENIDENTIFIERS.ALPHABET) {
-            this.__alphabet()
-            this.__subExprAlphabet()
-        } else {
-            this.__reject('Alfabeto')
-        }
+        if(tokenStruct.token != TOKENIDENTIFIERS.ALPHABET) 
+            throw this.__reject('Alfabeto')
+
+        this.__alphabet()
+        this.__subExprAlphabet()
     }
 
     /**
@@ -376,7 +486,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.STATE) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject('Estado')
+            throw this.__reject('Estado')
         }
     }
 
@@ -393,7 +503,7 @@ export class Parser {
         ) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject('Alfabeto')
+            throw this.__reject('Alfabeto')
         }
     }
 
@@ -406,7 +516,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.ASSIGMENT) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject('=')
+            throw this.__reject('=')
         }
     }
 
@@ -419,7 +529,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.MOVER) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject('L, R ou P')
+            throw this.__reject('L, R ou P')
         }
     }
 
@@ -432,7 +542,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.MODIFIER) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject('&')
+            throw this.__reject('&')
         }
     }
 
@@ -445,7 +555,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.COMMA) {
             this.__recognize(tokenStruct)
         } else {
-            this.__reject(',')
+            throw this.__reject(',')
         }
     }
 
@@ -489,7 +599,7 @@ export class Parser {
      * @param {TokenStruct} tokenStruct
      */
     __recognize(tokenStruct) {
-        console.log(this.__getAttribute(tokenStruct))
+        console.log("'" + this.__getAttribute(tokenStruct) + "'")
         this.lookaheader++
     }
 
@@ -508,19 +618,21 @@ export class Parser {
      * @returns {TokenStruct}
      */
     __lastCaughtToken() {
-        return this.symbolTable.symbols[this.lookaheader]
+        return this.symbolTable.symbols[this.lookaheader - 1]
     }
 
     /**
      * @private
      * @param {string} expected
      */
-    __reject(expected) {
+    __reject(expected, isNewLine = true) {
 
         const tokenCaught = this.__lastCaughtToken()
 
-        console.error(`Esperava um ${expected}  e não um ${ this.__getAttribute(tokenCaught)}`)
-        this.nextLine()
+        if(isNewLine)
+            this.nextLine()
+
+        return `Esperava um ${expected}  e não um ${ this.__getAttribute(tokenCaught)}`
     }
 
     /**

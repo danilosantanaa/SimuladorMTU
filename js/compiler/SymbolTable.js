@@ -1,3 +1,5 @@
+import * as setting from "../setting.js"
+
 class SetCustom {
     constructor() {
         this.set = []
@@ -51,20 +53,24 @@ export class TokenStruct {
         this.token = token
         this.attribute = attribute
         this.line = line
+        this.lineTable = null
         this.column = column
         this.columnTable = null
         this.scope = []
     }
 }
 
+
 export class SymbolTable {
 
-    constructor() {
+    constructor(ENVIRONMENT = setting.TYPE_ENVORONMENT.CODEFIRST) {
         this.symbols = []
 
         this.statesSet = new StateSet()
 
         this.alphabetSet = new AlphabetSet()
+
+        this.ENVIRONMENT = ENVIRONMENT
     }
 
     /**

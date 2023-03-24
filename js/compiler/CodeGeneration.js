@@ -2,16 +2,25 @@ export class CodeGeneration {
     constructor() {
         /**
          * Será gerada a lista de comandos
-         * @type {StateMain[]}
+         * @type {any[]}
          */
         this.commands = []
+
+        /**
+         * Últimos comandos
+         */
+        this.lastCommands = []
     }
 
     /**
      * @param {StateMain} stateMain
      */
-    add(state) {
-        this.commands.push(state)
+    add(state, last = false) {
+        if(!last) {
+            this.commands.push(state)
+        } else {
+            this.lastCommands.push(state)
+        }
     }
 
     /**
@@ -24,7 +33,12 @@ export class CodeGeneration {
             cmd_final += cmd.convert()
         });
 
-        return cmd_final
+        while(this.lastCommands.length > 0) {
+            const cmd = this.lastCommands.pop()
+            cmd_final += cmd?.convert()
+        }
+
+        return cmd_final.replace(/[\t\n]/g, "").replace(/\s\s/g, "")
     }
 }
 
@@ -48,7 +62,9 @@ export class StateMain {
     }
 
     convert() {
-        let cmds = `function ${this.label}(){ let _input_ribbon = read();`
+        let cmds = `function ${this.label}(){`
+
+        cmds += "if(is_stop) {stopRuntime();return;} let _input_ribbon  =  read();"
         
         for(let pos = 0; pos < this.body.length; pos++) {
             if (pos == 0) {
@@ -57,9 +73,9 @@ export class StateMain {
                 cmds += "else if"
             }
 
-            cmds += `
-                (_input_ribbon == '${this.body[pos].alphabetParams}')
+            cmds += `(_input_ribbon  ==  '${this.body[pos].alphabetParams}')
                 {
+                    write('${this.body[pos].state}');
                     ${this.body[pos].state}();
                     ${this.body[pos].getMoveComand()}();
                     put('${this.body[pos].alphabetModifier}');
@@ -72,6 +88,26 @@ export class StateMain {
         cmds += '}'
 
         return cmds
+    }
+}
+
+export class StateBegin {
+    constructor(label) {
+        this.label = label
+    }
+
+    convert() {
+       return `${this.label}();`
+    }
+}
+
+export class StateEnd {
+    constructor(label) {
+        this.label = label
+    }
+
+    convert() {
+        return `function ${this.label}() {accept();}`
     }
 }
 

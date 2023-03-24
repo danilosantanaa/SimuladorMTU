@@ -1,8 +1,9 @@
 import { Lexer } from "./Lexer.js"
 import { ErrorParser } from "../erros/ErrorParser.js"
-import { SymbolTable, TokenStruct } from "./SymbolTable.js"
+import { SymbolTable, TokenStruct, SCOPE } from "./SymbolTable.js"
 import { TOKENIDENTIFIERS } from "./TokenIdentifiers.js"
-import { CodeGeneration, Instruction, StateMain } from "./CodeGeneration.js"
+import { CodeGeneration, Instruction, StateMain, StateBegin, StateEnd} from "./CodeGeneration.js"
+import { ParserAnalyze } from "./ParserAnalyze.js"
 
 export class Parser {
     /**
@@ -36,6 +37,19 @@ export class Parser {
         this.errorParser = new ErrorParser()
 
         /**
+         * @type {Number} 
+         * Será responsável para atribuir em qual escopo as declaração estã declada.
+         * Armazena o ID do token
+         */
+        this.scopeID = null
+
+        /**
+         * @type {ParserAnalyze}
+         * Responsável por armazenar possíveis erros semânticos. 
+         */
+        this.parserAnalyze = new ParserAnalyze(this.symbolTable)
+
+        /**
          * Geração de Códigos Final
          */
         this.codeGeneration = new CodeGeneration()
@@ -51,6 +65,8 @@ export class Parser {
         console.log('code generation')
         console.log('------------------------')
         console.log(this.codeGeneration.generationFinalCode())
+        this.parserAnalyze.updateScopes()
+        this.parserAnalyze.tryAllErro()
     }
 
     nextLine() {
@@ -72,8 +88,10 @@ export class Parser {
 
             if(tokenStruct.token != TOKENIDENTIFIERS.E)
                 throw this.__reject('E')
-            
+
+            this.scopeID = SCOPE.E
             this.__recognize(tokenStruct)
+
             this.__assigment()
             this.__exprStates()
             this.__endLine()
@@ -95,7 +113,8 @@ export class Parser {
 
             if(tokenStruct.token != TOKENIDENTIFIERS.A)
                 throw this.__reject('A')
-                
+            
+            this.scopeID = SCOPE.A
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__exprAlphabet()
@@ -117,9 +136,14 @@ export class Parser {
             if(tokenStruct.token != TOKENIDENTIFIERS.S0)
                 throw this.__reject('S0')
             
+            this.scopeID = SCOPE.S0
             this.__recognize(tokenStruct)
             this.__assigment()
+
             this.__states()
+            this.codeGeneration.add(new StateBegin(this.__getAttribute(this.__lastCaughtToken())), true)
+            this.assignScope()
+
             this.__endLine()
             
         } catch(e) {
@@ -139,9 +163,14 @@ export class Parser {
             if(tokenStruct.token != TOKENIDENTIFIERS.F)
                 throw this.__reject('F')
             
+            this.scopeID = SCOPE.F
             this.__recognize(tokenStruct)
             this.__assigment()
+
             this.__states()
+            this.codeGeneration.add(new StateEnd(this.__getAttribute(this.__lastCaughtToken())), true)
+            this.assignScope()
+
             this.__endLine()
         
         } catch(e) {
@@ -159,7 +188,8 @@ export class Parser {
 
             if(tokenStruct.token != TOKENIDENTIFIERS.NF)
                 throw this.__reject('NF')
-            
+
+            this.scopeID = SCOPE.NF
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__exprStates()
@@ -183,6 +213,7 @@ export class Parser {
             if(tokenStruct.token != TOKENIDENTIFIERS.AF)
                 throw this.__reject('AF')
             
+            this.scopeID = SCOPE.AF
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__alphabet()
@@ -191,6 +222,7 @@ export class Parser {
             this.__dValueConst()
             this.__comma()
             this.__bValueConst()
+
             this.__endLine()
           
         } catch(e) {
@@ -211,6 +243,7 @@ export class Parser {
             if(tokenStruct.token != TOKENIDENTIFIERS.D) 
                 throw this.__recognize('D')
 
+            this.scopeID = SCOPE.D
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__dValueConst()
@@ -231,6 +264,8 @@ export class Parser {
             throw this.__reject('>')
     
         this.__recognize(tokenStruct)
+        this.assignScope()
+
         this.__endLine()
     }
 
@@ -245,6 +280,7 @@ export class Parser {
             if(tokenStruct.token != TOKENIDENTIFIERS.B)
                 throw this.__reject('B')
             
+            this.scopeID = SCOPE.B
             this.__recognize(tokenStruct)
             this.__assigment()
             this.__bValueConst()
@@ -263,7 +299,8 @@ export class Parser {
         if(tokenStruct.token != TOKENIDENTIFIERS.B_VAL_CONST)
             throw this.__reject('b')
         
-        this.__recognize(tokenStruct)
+            this.__recognize(tokenStruct)
+            this.assignScope()
     }
 
     /**
@@ -293,6 +330,7 @@ export class Parser {
             this.__states()
             const lastState = this.__getAttribute(this.__lastCaughtToken())
             this.stateMain = new StateMain(lastState)
+            this.scopeID = SCOPE.DELTA
 
             this.__endLine()
             this.codeGeneration.add(this.stateMain)
@@ -324,14 +362,17 @@ export class Parser {
 
             this.__states()
             this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__alphabet()
             this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
             this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__mover()
             const lastToken = this.__lastCaughtToken()
@@ -373,14 +414,17 @@ export class Parser {
 
             this.__states()
             this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__alphabet()
             this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
             this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+            this.assignScope()
 
             this.__mover()
             const lastToken = this.__lastCaughtToken()
@@ -410,6 +454,9 @@ export class Parser {
     __program() {
         this.__nontuple()
         this.__delta()
+
+        // Adicionando as chamadas do estado inicial
+
     }
 
     /**
@@ -422,6 +469,8 @@ export class Parser {
             throw this.__reject('Estado')
 
         this.__states()
+        this.assignScope()
+
         this.__subExprStates()
     }
 
@@ -433,7 +482,10 @@ export class Parser {
         
         if(tokenStruct.token == TOKENIDENTIFIERS.COMMA) {
             this.__comma()
+
             this.__states()
+            this.assignScope()
+
             this.__subExprStates()
         }
     }
@@ -448,6 +500,8 @@ export class Parser {
             throw this.__reject('Alfabeto')
 
         this.__alphabet()
+        this.assignScope()
+
         this.__subExprAlphabet()
     }
 
@@ -460,6 +514,8 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.COMMA) {
             this.__comma()
             this.__alphabet()
+            this.assignScope()
+
             this.__subExprAlphabet()
         }
     }
@@ -502,6 +558,7 @@ export class Parser {
             tokenStruct.token == TOKENIDENTIFIERS.D_VAL_CONST
         ) {
             this.__recognize(tokenStruct)
+            this.assignScope()
         } else {
             throw this.__reject('Alfabeto')
         }
@@ -583,17 +640,6 @@ export class Parser {
     }
 
     /**
-     * @private
-     */
-    __eof() {
-        const tokenStruct = this.__getToken()
-
-        // if(tokenStruct.token == TOKENIDENTIFIERS.EOF) {
-        //     this.__recognize(tokenStruct)
-        // }
-    }
-
-    /**
      * Realizar o reconhecimento dos token e muda o ponteiro para o próximo token da tabela
      * @private
      * @param {TokenStruct} tokenStruct
@@ -651,4 +697,21 @@ export class Parser {
         return tokenStruct.attribute
     }
 
+    /**
+     * Reponsável por indentificar em qual escopo os estados, alfabeto, delimitador ou branco de fita se encontra.
+     */
+    assignScope() {
+        const lastToken = this.symbolTable.getToken(this.lookaheader - 1)
+
+        const token_valid  = lastToken != null && (
+            lastToken.token == TOKENIDENTIFIERS.STATE ||
+            lastToken.token == TOKENIDENTIFIERS.ALPHABET ||
+            lastToken.token == TOKENIDENTIFIERS.B_VAL_CONST ||
+            lastToken.token == TOKENIDENTIFIERS.D_VAL_CONST
+        )
+
+        if(token_valid) {
+            this.symbolTable.addScope(this.scopeID, this.lookaheader - 1)
+        }
+    }
 }

@@ -9,31 +9,44 @@ A = 0,1,2
 S0 = q0
 F = q7
 NF = q0,q1,q2,q3,q4,q5,q6
-AF = 0, 1, 2, X, Y,>, b
+AF = 0,1,2,X,Y,>,b
 D = >
 B = b
 
-
-# Aqui será um comentário
+# Comentário 1
+q10
 q0
-	q1 0&b R
+	q4 0&0 R
+	q1 1&X R
+	q0 >&> R
+
+# Comentário 2
 q1
 	q2 0&0 R
 	q1 1&1 R
-	q2 1&1 L
+
+# Comentário 3
 q2
 	q3 2&Y L
 	q2 Y&Y R
+
+# Comentário 4
 q3
 	q3 0&0 L
 	q3 1&1 L
 	q0 X&X R
 	q3 Y&Y L
+
+# Comentário 5
 q4
 	q5 1&1 R
 	q4 Y&Y R
+
+# Comentário 6
 q5
 	q6 0&0 R
+
+# Comentário 7
 q6
 	q7 b&b P
 

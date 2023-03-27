@@ -162,13 +162,14 @@ export class Lexer {
             this.__q28()
         }
         else if(caracter == '\t') {
-            this.next()
+            this.next(true)
             this.__q27()
         }   
         else if(caracter == undefined || caracter == null) {
             this.__accept(TOKENIDENTIFIERS.EOF)
         }
         else {
+            this.substring += caracter
             this.__reject()
         }
     }
@@ -455,10 +456,17 @@ export class Lexer {
      * @private
      */
     __reject() {
-        this.errorLexer.add(this.getCaracter(), this.linePosition, this.columnPosition)
-        this.next()
-        this.substring = ""
-        this.__q0()
+
+        try {
+            this.errorLexer.add(this.linePosition, this.columnPosition, this.substring)
+            throw this.errorLexer.getLastErro()
+        } catch(e) {
+            console.error(e)
+        } finally {
+            this.next()
+            this.substring = ""
+            this.__q0()
+        }
     }
 
     /**
@@ -495,7 +503,7 @@ export class Lexer {
      * @private
      */
     getCaracter() {
-        if(this.codigo_fonte.length == 0) throw 'No content!'
+        if(this.codigo_fonte?.length == 0) throw 'No content!'
 
         return this.codigo_fonte[this.lookahead]
     }
@@ -511,10 +519,10 @@ export class Lexer {
     /**
      * @private
      */
-    next() {
+    next(isTab = true) {
         this.substring += this.getCaracter()
         this.lookahead++
-        this.columnPosition++
+        this.columnPosition += isTab ? 4 : 1
     }
 
     /**

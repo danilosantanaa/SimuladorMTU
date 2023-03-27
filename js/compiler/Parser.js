@@ -61,12 +61,14 @@ export class Parser {
      * Constroi a arvore de derivação.
      */
     parser() {
-        this.__program()
-        console.log('code generation')
-        console.log('------------------------')
-        console.log(this.codeGeneration.generationFinalCode())
-        this.parserAnalyze.updateScopes()
-        this.parserAnalyze.tryAllErro()
+        if(this.symbolTable.symbols.length > 0) {
+            this.__program()
+            console.log('code generation')
+            console.log('------------------------')
+            console.log(this.codeGeneration.generationFinalCode())
+            this.parserAnalyze.updateScopes()
+            this.parserAnalyze.tryAllErro()
+        }
     }
 
     nextLine() {
@@ -324,7 +326,7 @@ export class Parser {
         const tokenStruct = this.__getToken()
     
         try {
-            if (tokenStruct.token == TOKENIDENTIFIERS.EOF)
+            if (tokenStruct.token == TOKENIDENTIFIERS.EOF || tokenStruct.token == TOKENIDENTIFIERS.ENDLINE)
                 return
 
             this.__states()
@@ -645,7 +647,7 @@ export class Parser {
      * @param {TokenStruct} tokenStruct
      */
     __recognize(tokenStruct) {
-        console.log("'" + this.__getAttribute(tokenStruct) + "'")
+        //console.log("'" + this.__getAttribute(tokenStruct) + "'")
         this.lookaheader++
     }
 
@@ -686,15 +688,15 @@ export class Parser {
      * @private
      */
     __getAttribute(tokenStruct) {
-        if(Number.isInteger(tokenStruct.attribute)) {
-            if (tokenStruct.token == TOKENIDENTIFIERS.STATE) {
+        if(Number.isInteger(tokenStruct?.attribute)) {
+            if (tokenStruct?.token == TOKENIDENTIFIERS.STATE) {
                 return this.symbolTable.statesSet.set[tokenStruct.attribute].attribute
             }
 
             return this.symbolTable.alphabetSet.set[tokenStruct.attribute].attribute
         }
 
-        return tokenStruct.attribute
+        return tokenStruct?.attribute
     }
 
     /**

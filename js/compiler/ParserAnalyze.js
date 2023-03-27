@@ -75,6 +75,7 @@ export class ParserAnalyze {
     }
 
     tryAllErro() {
+        this.chechAlphabet()
         this.checkStateBegin()
         this.checkStateEnd()
         this.checkRibbonAlphabet()
@@ -98,19 +99,34 @@ export class ParserAnalyze {
 
     checkRibbonAlphabet() {
         try {
-            const attributes = this.ribbonAlphabetScopes.map(el => el.attribute)
+              /**@type {TokenStruct} */
+                const tokenDuplicate = this.chechDuplicate(this.ribbonAlphabetScopes)
 
-            if(this.chechDuplicate(attributes)) {
-                const lastAttribute = this.ribbonAlphabetScopes.shift()
-
-                this.erroSemantic.addErroDuplicate(lastAttribute.line, 1, "Alfabeto de Fita")
-                throw this.erroSemantic.errorList.shift()
-            }
+                if(tokenDuplicate != null) {
+                    this.erroSemantic.addErroDuplicate(tokenDuplicate.line, tokenDuplicate.column, this.symbolTable.alphabetSet.set[tokenDuplicate.attribute].attribute, `no "Alfabeto de Fita"`)
+                    throw this.erroSemantic.getLastErro()
+                }
 
             this.checkObeyOrderRibbonAlphabetOfAlphabet()
         } catch(e) {
             console.error(e)
         }
+    }
+
+    chechAlphabet() {
+       try {
+
+           /**@type {TokenStruct} */
+           const tokenDuplicate = this.chechDuplicate(this.alphabetScopes)
+   
+           if(tokenDuplicate != null) {
+               this.erroSemantic.addErroDuplicate(tokenDuplicate.line, tokenDuplicate.column, this.symbolTable.alphabetSet.set[tokenDuplicate.attribute].attribute, `no "Alfabeto"`)
+               throw this.erroSemantic.getLastErro()
+           }
+       } catch(e) {
+            console.error(e)
+       }
+        
     }
 
     // ----- metodos auxliares
@@ -120,24 +136,24 @@ export class ParserAnalyze {
     checkStateBeginScope() {
         /**@type {TokenStruct} */
         const stateBeginToken =  this.stateBeginScopes.shift()
-        const attributeValue = this.symbolTable.statesSet.set[stateBeginToken.attribute].attribute
-        const hasStateBegindeclared = this.statesScopes.some(token => token.attribute == stateBeginToken.attribute)
+        const attributeValue = this.symbolTable.statesSet.set[stateBeginToken?.attribute]?.attribute
+        const hasStateBegindeclared = this.statesScopes.some(token => token?.attribute == stateBeginToken?.attribute)
 
-        if(!hasStateBegindeclared) {
+        if(!hasStateBegindeclared && stateBeginToken != undefined) {
             this.erroSemantic.addErroScope(stateBeginToken.line, stateBeginToken.column, attributeValue, "Estado Inicial", "Conjuntos de Estados")
-            throw this.erroSemantic.errorList.shift() + "\n"
+            throw this.erroSemantic.getLastErro() + "\n"
         }
     }
 
     checkStateEndScope() {
          /**@type {TokenStruct} */
          const stateEndToken =  this.stateEndScopes.shift()
-         const attributeValue = this.symbolTable.statesSet.set[stateEndToken.attribute].attribute
-         const hasStateBegindeclared = this.statesScopes.some(token => token.attribute == stateEndToken.attribute)
+         const attributeValue = this.symbolTable.statesSet.set[stateEndToken?.attribute]?.attribute
+         const hasStateBegindeclared = this.statesScopes.some(token => token?.attribute == stateEndToken?.attribute)
  
-         if(!hasStateBegindeclared) {
+         if(!hasStateBegindeclared && stateEndToken != null) {
              this.erroSemantic.addErroScope(stateEndToken.line, stateEndToken.column, attributeValue, "Estado Final", "Conjuntos de Estados")
-             throw this.erroSemantic.errorList.shift() + "\n"
+             throw this.erroSemantic.getLastErro() + "\n"
          }
     }
 
@@ -145,11 +161,9 @@ export class ParserAnalyze {
 
     checkObeyOrderRibbonAlphabetOfAlphabet() {
         for(let pos = 0; pos < this.alphabetScopes.length; pos++) {
-            if(this.alphabetScopes[pos].attribute != this.ribbonAlphabetScopes[pos].attribute) {
-                const sequence = this.alphabetScopes.map(token => this.symbolTable.alphabetSet.set[token.attribute].attribute).join(', ')
-
-                this.erroSemantic.addErroSequenceObey(this.ribbonAlphabetScopes[pos].line, 1,  "Alfabeto de Fita", sequence , "Alfabeto")
-                throw this.erroSemantic.errorList.shift()
+            if(this.alphabetScopes[pos]?.attribute != this.ribbonAlphabetScopes[pos]?.attribute) {
+                this.erroSemantic.addErroSequenceObey(this.ribbonAlphabetScopes[pos]?.line, this.ribbonAlphabetScopes[pos]?.column - 1,  "Alfabeto de Fita" , "Alfabeto")
+                throw this.erroSemantic.getLastErro()
             }
         }
     }
@@ -163,20 +177,20 @@ export class ParserAnalyze {
      */
     chechDuplicate(array) {
         const map = new Map()
-        let is_burst = false
+        let is_burst = null
 
         array.forEach(el => {
-            if(map.has(el)) {
-                const value = map.get(el) + 1
-                map.set(el, value)
+            if(map.has(el.attribute)) {
+                const value = map.get(el.attribute) + 1
+                map.set(el.attribute, value)
                 
                 // Se encontrar um valor que já passou do limite, quebrar.
                 if(value > 1) {
-                    is_burst = true
+                    is_burst = el
                     return
                 }
             } else {
-                map.set(el, 1)
+                map.set(el.attribute, 1)
             }
         })
 

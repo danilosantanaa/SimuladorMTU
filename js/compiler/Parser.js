@@ -67,7 +67,7 @@ export class Parser {
             console.log('------------------------')
             console.log(this.codeGeneration.generationFinalCode())
             this.parserAnalyze.updateScopes()
-            this.parserAnalyze.tryAllErro()
+            this.parserAnalyze.catchAllErro()
         }
     }
 
@@ -363,20 +363,24 @@ export class Parser {
             this.__tab();
 
             this.__states()
+            this.parserAnalyze.command.state = this.__lastCaughtToken()
             this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__alphabet()
+            this.parserAnalyze.command.alphabetOld = this.__lastCaughtToken()
             this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
+            this.parserAnalyze.command.alphabetNew = this.__lastCaughtToken()
             this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__mover()
+            this.parserAnalyze.command.move = this.__lastCaughtToken()
             const lastToken = this.__lastCaughtToken()
 
             if(lastToken.attribute == 'R') {
@@ -392,6 +396,7 @@ export class Parser {
             }
 
             this.__endLine()
+            this.parserAnalyze.addCommand()
             this.stateMain.add(this.instruction)
 
             this.__subCmds()
@@ -415,20 +420,24 @@ export class Parser {
             this.__tab()
 
             this.__states()
+            this.parserAnalyze.command.state = this.__lastCaughtToken()
             this.instruction.state = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__alphabet()
+            this.parserAnalyze.command.alphabetOld = this.__lastCaughtToken()
             this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
+            this.parserAnalyze.command.alphabetNew = this.__lastCaughtToken()
             this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__mover()
+            this.parserAnalyze.command.move = this.__lastCaughtToken()
             const lastToken = this.__lastCaughtToken()
 
             if(lastToken.attribute == 'R') {
@@ -444,6 +453,7 @@ export class Parser {
             }
 
             this.__endLine()
+            this.parserAnalyze.addCommand()
             this.stateMain.add(this.instruction)
 
             this.__subCmds()
@@ -456,9 +466,6 @@ export class Parser {
     __program() {
         this.__nontuple()
         this.__delta()
-
-        // Adicionando as chamadas do estado inicial
-
     }
 
     /**

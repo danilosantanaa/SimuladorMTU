@@ -42,6 +42,15 @@ class SetCustom {
     getAttribute(attribute) {
         return this.set.find(x => x.attribute == attribute)
     }
+
+    /**
+     * Retorna o Valor do atributos adicionado na lista
+     * @param {Number} position
+     * @returns {string}
+     */
+    getAttributeValue(position) {
+        return this.set[position].attribute
+    }
 }
 
 class AlphabetSet extends SetCustom {}

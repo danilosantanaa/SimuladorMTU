@@ -12,6 +12,6 @@ export const MESSAGE_ERROR_SEMATIC = {
     DUPLICATE_DELTA: `({0}, {1}) Não ter saída duplicada em {2}, gera indeterminismo.`,
     OBEYORDER: `({0}, {1}) Os elementos de "{2}" no inicio, deve conter a mesma sequência do "{3}."`,
     STATE_FINAL: `({0}, {1}) O estado final deve haver um movimentador "P" para determinar fim de execução. O comando será {2} {3} P.`,
-    STATE_BEGIN: `({0}, {1}) Por favor, deve ser colocado o estado inicial que irá dar inicio ao execução. O comando será {2} > R.`,
+    STATE_BEGIN: `Deve ser colocado o estado inicial que irá dar inicio ao execução. O comando será {0} > R.`,
     RIBBONALPHABET: `({0}, {1}) O alfabeto não foi declarado no alfabeto de fita. Por favor, coloque todo o alfabeto no alfabeto de fita.`,
 } 

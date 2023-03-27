@@ -15,4 +15,8 @@ export class ErrorSemantic extends Error {
     addErroDuplicate(line, column, attribute, current_scope) {
         this.errorList.push(stringFormat(MESSAGE_ERROR_SEMATIC.DUPLICATE_SCOPE, line, column, attribute, current_scope))
     }
+
+    addErroStateBegin(stateBeginDeclared) {
+        this.errorList.push(stringFormat(MESSAGE_ERROR_SEMATIC.STATE_BEGIN, stateBeginDeclared))
+    }
 }

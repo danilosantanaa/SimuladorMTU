@@ -519,7 +519,7 @@ export class Lexer {
     /**
      * @private
      */
-    next(isTab = true) {
+    next(isTab = false) {
         this.substring += this.getCaracter()
         this.lookahead++
         this.columnPosition += isTab ? 4 : 1

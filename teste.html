@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button class="open">Abrir</button>
+    <button class="save">Salvar</button>
+    <textarea class="textarea" style="width: 100%; height: 95vh;"></textarea>
+</body>
+<script src="js/filemanager/FileManager.js"></script>
+<script>
+    const filemanager = new FileManager()
+    const openEl = document.querySelector(".open")
+    const saveEl = document.querySelector(".save")
+    const textareaEl = document.querySelector(".textarea")
+
+    openEl.addEventListener("click", async () => {
+        await filemanager.open()
+        textareaEl.value = filemanager.getContents()
+    }, true)
+
+    saveEl.addEventListener("click", async () => {
+        filemanager.setContents(textareaEl.value)
+        await filemanager.save()
+    }, true)
+</script>
+</html>

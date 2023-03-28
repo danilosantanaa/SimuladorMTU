@@ -11,7 +11,7 @@ class FileManager {
                 }
             ]
         }
-        
+        this.file = null
         this.contents = ""
     }
 
@@ -21,9 +21,10 @@ class FileManager {
             this.contents = ""
             this.fileHandle = (await window.showOpenFilePicker(this.options))[0]
             
-            const file = await this.fileHandle.getFile()
-            
-            this.contents = await file.text()
+            this.file = await this.fileHandle.getFile()
+
+            await this.read()
+        
         } catch(e) {
             console.error(e)
         }
@@ -42,6 +43,10 @@ class FileManager {
         await this.write()
     }
 
+    async read() {
+        this.contents = await this.file.text()
+    }
+
     getFileInformation() {
         return {
             name: this.fileHandle.name
@@ -50,6 +55,10 @@ class FileManager {
 
     getContents() {
         return this.contents
+    }
+
+    setContents(contents) {
+        this.contents = contents
     }
 
     /**

@@ -1,0 +1,106 @@
+
+/* TABELA DE COMANDO */
+.tabela-comando {
+    width: 100%;
+    min-height: 60vh;
+    max-height: 60vh;
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--color3a);
+    border-radius: 10px;
+    box-shadow: 5px 5px 6px rgba(0, 0, 0, 0.158);
+    font-size: 1.3em;
+    overflow-x: scroll;
+}
+
+.tb-content {
+    padding: 0;
+}
+
+.tb-content.mostrar {
+    display: block;
+}
+
+table.codigo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.2em;
+}
+
+tr td, tr th {
+    border: 2px solid rgba(19, 19, 19, 0.466);
+    padding: 5px 10px;
+    min-width: 100px;
+}
+
+thead tr th {
+    background-color: var(--color1);
+    color: white;
+}
+
+thead tr.buttons-options td {
+    border: none;
+    background-color: transparent;
+    position: relative;
+   height: 30px;
+}
+
+table.codigo tbody {
+    background-color: transparent;
+    color: black;
+    font-family: monospace;
+}
+
+table.codigo tr:focus-within {
+    background-color: #cecece;
+    font-weight: bolder;
+}
+
+table.codigo .info {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+table.codigo .erro {
+    border-color: red;
+    color: red;
+}
+
+table.codigo .th-info {
+    padding: 0;
+}
+
+table.codigo .info > div {
+    padding: 20px 20px;
+}
+
+table.codigo .info .sigma {
+    width: 50%;
+}
+
+table.codigo .info .estado {
+    width: 50%;
+}
+
+table.codigo .cmd-linha {
+    /* background-color: #8f8f8f; */
+    color: black;
+    width: fit-content;
+    min-width: fit-content;
+    text-align: right;
+    padding: 2px 5px 2px 20px;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    font-size: 0.8em;
+}
+
+table.codigo tr .cmd-linha.cl-codigo {
+    background-color: transparent;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+}

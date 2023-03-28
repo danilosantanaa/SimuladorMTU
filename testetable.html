@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            padding: 20px;
+            background-color: #cdcdcd;
+        }
+
+        .teste {
+            margin-bottom: 20px;
+        }
+
+        .table-content {
+            width: 50%;
+            height: 50vh;
+            overflow: auto;
+        }
+
+        .table-code {
+            background-color: #fff;
+            width: fit-content;
+            border-collapse: collapse;
+        }
+
+        .table-code td {
+            padding: 10px;
+        }
+
+        .table-code tbody td {
+            border: 1px solid rgba(0,0,0.3);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="teste">
+        <input type="text" id="teste">
+    </div>
+
+    <div class="table-content">
+        <table class="table-code"> 
+            <thead>
+                <tr>
+                    <th class="c1"></th>
+                    <th class="c2">Q/&Sigma;</th>
+                    <th class="c3">A</th>
+                    <th class="c4">B</th>
+                    <th class="c5">C</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="c1">1</td>
+                    <td class="c2">q1</td>
+                    <td class="c3">q3 1 R</td>
+                    <td class="c4">q5 1 R</td>
+                    <td class="c5">q8 1 R</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

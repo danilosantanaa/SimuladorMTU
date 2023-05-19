@@ -230,7 +230,7 @@ main {
     background-color: blue;
 }
 
-.entrada-dados .btn.abrir {
+.entrada-dados .btn.abrir, .btn.novo {
     background-color: var(--color1);
 }
 

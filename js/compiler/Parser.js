@@ -89,7 +89,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
 
             if(tokenStruct.token != TOKENIDENTIFIERS.E)
-                throw this.__reject('E')
+                throw this.__reject('E', tokenStruct)
 
             this.scopeID = SCOPE.E
             this.__recognize(tokenStruct)
@@ -114,7 +114,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
 
             if(tokenStruct.token != TOKENIDENTIFIERS.A)
-                throw this.__reject('A')
+                throw this.__reject('A', tokenStruct)
             
             this.scopeID = SCOPE.A
             this.__recognize(tokenStruct)
@@ -136,7 +136,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
             
             if(tokenStruct.token != TOKENIDENTIFIERS.S0)
-                throw this.__reject('S0')
+                throw this.__reject('S0', tokenStruct)
             
             this.scopeID = SCOPE.S0
             this.__recognize(tokenStruct)
@@ -163,7 +163,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
     
             if(tokenStruct.token != TOKENIDENTIFIERS.F)
-                throw this.__reject('F')
+                throw this.__reject('F', tokenStruct)
             
             this.scopeID = SCOPE.F
             this.__recognize(tokenStruct)
@@ -189,7 +189,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
 
             if(tokenStruct.token != TOKENIDENTIFIERS.NF)
-                throw this.__reject('NF')
+                throw this.__reject('NF', tokenStruct)
 
             this.scopeID = SCOPE.NF
             this.__recognize(tokenStruct)
@@ -213,7 +213,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
             
             if(tokenStruct.token != TOKENIDENTIFIERS.AF)
-                throw this.__reject('AF')
+                throw this.__reject('AF', tokenStruct)
             
             this.scopeID = SCOPE.AF
             this.__recognize(tokenStruct)
@@ -243,7 +243,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
             
             if(tokenStruct.token != TOKENIDENTIFIERS.D) 
-                throw this.__recognize('D')
+                throw this.__recognize('D', tokenStruct)
 
             this.scopeID = SCOPE.D
             this.__recognize(tokenStruct)
@@ -263,7 +263,7 @@ export class Parser {
         const tokenStruct = this.__getToken()
 
         if(tokenStruct.token != TOKENIDENTIFIERS.D_VAL_CONST)
-            throw this.__reject('>')
+            throw this.__reject('>', tokenStruct)
     
         this.__recognize(tokenStruct)
         this.assignScope()
@@ -280,7 +280,7 @@ export class Parser {
             const tokenStruct = this.__getToken()
             
             if(tokenStruct.token != TOKENIDENTIFIERS.B)
-                throw this.__reject('B')
+                throw this.__reject('B', tokenStruct)
             
             this.scopeID = SCOPE.B
             this.__recognize(tokenStruct)
@@ -299,7 +299,7 @@ export class Parser {
         const tokenStruct = this.__getToken()
 
         if(tokenStruct.token != TOKENIDENTIFIERS.B_VAL_CONST)
-            throw this.__reject('b')
+            throw this.__reject('b', tokenStruct)
         
             this.__recognize(tokenStruct)
             this.assignScope()
@@ -358,7 +358,7 @@ export class Parser {
             this.instruction = new Instruction()
 
             if(tokenStruct.token != TOKENIDENTIFIERS.TAB)
-                throw this.__reject('TAB', false)
+                throw this.__reject('TAB', tokenStruct, false)
 
             this.__tab();
 
@@ -475,7 +475,7 @@ export class Parser {
         const tokenStruct = this.__getToken()
         
         if(tokenStruct.token != TOKENIDENTIFIERS.STATE)
-            throw this.__reject('Estado')
+            throw this.__reject('Estado', tokenStruct)
 
         this.__states()
         this.assignScope()
@@ -506,7 +506,7 @@ export class Parser {
         const tokenStruct = this.__getToken()
 
         if(tokenStruct.token != TOKENIDENTIFIERS.ALPHABET) 
-            throw this.__reject('Alfabeto')
+            throw this.__reject('Alfabeto', tokenStruct)
 
         this.__alphabet()
         this.assignScope()
@@ -551,7 +551,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.STATE) {
             this.__recognize(tokenStruct)
         } else {
-            throw this.__reject('Estado')
+            throw this.__reject('Estado', tokenStruct)
         }
     }
 
@@ -569,7 +569,7 @@ export class Parser {
             this.__recognize(tokenStruct)
             this.assignScope()
         } else {
-            throw this.__reject('Alfabeto')
+            throw this.__reject('Alfabeto', tokenStruct)
         }
     }
 
@@ -582,7 +582,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.ASSIGMENT) {
             this.__recognize(tokenStruct)
         } else {
-            throw this.__reject('=')
+            throw this.__reject('=', tokenStruct)
         }
     }
 
@@ -595,7 +595,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.MOVER) {
             this.__recognize(tokenStruct)
         } else {
-            throw this.__reject('L, R ou P')
+            throw this.__reject('L, R ou P', tokenStruct)
         }
     }
 
@@ -608,7 +608,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.MODIFIER) {
             this.__recognize(tokenStruct)
         } else {
-            throw this.__reject('&')
+            throw this.__reject('&', tokenStruct)
         }
     }
 
@@ -621,7 +621,7 @@ export class Parser {
         if(tokenStruct.token == TOKENIDENTIFIERS.COMMA) {
             this.__recognize(tokenStruct)
         } else {
-            throw this.__reject(',')
+            throw this.__reject(',', tokenStruct)
         }
     }
 
@@ -680,14 +680,14 @@ export class Parser {
      * @private
      * @param {string} expected
      */
-    __reject(expected, isNewLine = true) {
-
-        const tokenCaught = this.__lastCaughtToken()
+    __reject(expected, capture = null, isNewLine = true) {
+        
+        const msg = `(${capture.line}, ${capture.column}) Esperava um "${expected}" e não um "${this.__getAttribute(capture)}"`
 
         if(isNewLine)
             this.nextLine()
-
-        return `Esperava um ${expected}  e não um ${ this.__getAttribute(tokenCaught)}`
+        
+            return msg
     }
 
     /**

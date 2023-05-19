@@ -2,7 +2,7 @@
 // import { Parser } from "./compiler/Parser.js";
 // import { SymbolTable } from "./compiler/SymbolTable.js";
 
-import { Nontuple } from "./codeEditor/Nontuple.js";
+import { Toolbar } from "./codeEditor/Toolbar.js";
 import { Table } from "./codeEditor/Table.js";
 
 // const symbolTable = new SymbolTable()
@@ -76,4 +76,6 @@ import { Table } from "./codeEditor/Table.js";
 //     table.observer()
 // }, false)
 
-const nontupla = new Nontuple()
+// const nontupla = new Nontuple()
+
+const toolbar = new Toolbar()

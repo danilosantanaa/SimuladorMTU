@@ -16,6 +16,7 @@ export class Nontuple {
         this.eventosFocusOut();
 
         this.table = new Table()
+
         this.ExpressaoRegular = new utils.ExpressaoRegular()
     }
 
@@ -93,8 +94,10 @@ export class Nontuple {
     }
 
     gerarTabela() {
-        this.table.ribbonAlphabet = this.alfaberto_fita
         this.table.init()
+        this.table.ribbonAlphabet = this.isNontuplaValida() ? this.alfaberto_fita : this.table.ribbonAlphabet
+        this.table.observer()
+       
     }
 
     preencherCamposAutomaticamente() {
@@ -267,6 +270,10 @@ export class Nontuple {
                 this.isEstadoNaoFinal() &&
                 this.isEstadoNaoFinal() &&
                 this.isAlfabertoFita()
+    }
+
+    getCode() {
+        return `E = ${this.conjunto_estado.join(',')}\nA = ${this.alfaberto.join(',')}\nS0 = ${this.estado_inicial.join(',')}\nF = ${this.estado_final.join(',')}\nNF = ${this.estado_nao_final.join(',')}\nAF = ${this.alfaberto_fita.join(',')}\nD = >\nB = b\n\n`
     }
 
 }

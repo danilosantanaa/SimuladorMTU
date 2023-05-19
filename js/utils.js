@@ -63,8 +63,9 @@ export class ExpressaoRegular {
         }
 
         this.Substituicao = {
-            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-pr-zA-KM-OS-Z0-9\>\Б\►])?(\s*)([R|L|P]?)\s*$/g,
-            ESTADO: /^\s*([qQ][0-9]+)(\s*)$/g
+            SUBSTITUIR_COMANDOS: /^\s*([qQ][0-9]+)(\s+)([a-c-pr-zCG-KMOT-Z0-9\+\*\-\/\>\Б\►])?(\s*)([R|L|P]?)\s*$/g,
+            ESTADO: /^\s*([qQ][0-9]+)(\s*)$/g,
+            ALFABETO_FITA: /(\s+)([a-c-pr-zCG-KMOT-Z0-9\+\*\-\/\>\Б\►])(\s*)/
         }
     }
 }

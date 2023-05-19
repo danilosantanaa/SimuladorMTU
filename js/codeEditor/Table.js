@@ -1,4 +1,4 @@
-import { createElement, insertElement } from "../utils.js"
+import { ExpressaoRegular, createElement, insertElement } from "../utils.js"
 
 export class Table {
     constructor() {
@@ -51,8 +51,33 @@ export class Table {
             this.addBody()
             this.is_init = true
         }
+    }
 
-        this.observer()
+    /**
+     * Ler todo o código fonte digitado na tabela. 
+     */
+    readContent() {
+        let source_code = ""
+
+        const regularExpression = new ExpressaoRegular()
+
+        for(let th of this.tb_body_el.querySelectorAll('tr')) {
+            const tds = th.querySelectorAll('td[contenteditable=true]')
+
+            for(let [index, td] of tds.entries()) {
+
+                if(td.outerText.trim() != "" || td.hasAttribute('point-state')) {
+                    if(td.hasAttribute('scope')) {
+                        const template_replace = ` ${this.ribbonAlphabet[index-1]}&$2 `
+                        source_code += `\t${td.outerText.replace(regularExpression.Substituicao.ALFABETO_FITA, template_replace)}\n`
+                    } else {
+                        source_code += `${td.outerText}\n`
+                    }
+                }
+            }
+        }
+
+        return source_code
     }
 
     updateRibbonRemoved() {
@@ -98,7 +123,7 @@ export class Table {
 
             if(scope != alphabet) {
                 const th = createElement('th', alphabet, this.addDataInformationElement(alphabet, false))
-                tr.insertBefore(th, headers_th[pos])
+                tr?.insertBefore(th, headers_th[pos])
             }   
         }
 
@@ -228,8 +253,10 @@ export class Table {
                 })
             }
             
-            // Verifica se está na coluna dos conjuntos de estados e adiciona a funcionalidade de apagar a linha
+            // Verifica se está na coluna dos "conjuntos de estados/estado apontador" e adiciona a funcionalidade de apagar a linha
             if(i == 1) {
+                td.setAttribute('point-state', "")
+                
                 if(this.totLineRender > 0) {
                     td.onkeydown = e => base.removeLine(e, tr)
                 }

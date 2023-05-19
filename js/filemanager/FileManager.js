@@ -1,4 +1,4 @@
-class FileManager {
+export class FileManager {
     constructor() {
         this.fileHandle = null
         this.options = {
@@ -33,7 +33,6 @@ class FileManager {
     async create() {
         try {
             this.fileHandle = await window.showSaveFilePicker(this.options)
-            await this.write()
         } catch(e) {
             console.error(e)
         }
@@ -44,7 +43,7 @@ class FileManager {
     }
 
     async read() {
-        this.contents = await this.file.text()
+        this.contents = await this.file?.text()
     }
 
     getFileInformation() {
@@ -65,11 +64,14 @@ class FileManager {
      * @private
      */
     async write() {
-        if(this.fileHandle != null) {
-            const writable = await this.fileHandle.createWritable()
-            await writable.write(this.contents)
-            await writable.close()
+        if(this.fileHandle == null) {
+            await this.create()
         }
+
+        const writable = await this.fileHandle.createWritable()
+        await writable.write(this.contents)
+        await writable.close()
+        
     }
 
 }

@@ -79,6 +79,11 @@ main {
     border: 1px solid var(--color1);
 }
 
+.fitas.execute {
+    overflow: hidden;
+    overflow-x: hidden;
+}
+
 /* width */
 *::-webkit-scrollbar {
     height: 10px;
@@ -139,12 +144,13 @@ main {
     left: 0.5%;
 }
 
-.cabecote {
+.hidden-cobecote {
     display: none;
 }
 
-.cabecote.rolagem {
+.cabecote {
     display: flex;
+    width: 50px;
 }
 
 .entrada-dados {

@@ -79,3 +79,5 @@ import { Table } from "./codeEditor/Table.js";
 // const nontupla = new Nontuple()
 
 const toolbar = new Toolbar()
+
+

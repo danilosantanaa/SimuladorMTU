@@ -85,8 +85,8 @@ table.codigo .info .estado {
     width: 50%;
 }
 
-table.codigo .cmd-linha {
-    /* background-color: #8f8f8f; */
+table.codigo .number-line {
+    background-color: transparent;
     color: black;
     width: fit-content;
     min-width: fit-content;
@@ -98,7 +98,7 @@ table.codigo .cmd-linha {
     font-size: 0.8em;
 }
 
-table.codigo tr .cmd-linha.cl-codigo {
+table.codigo .number-line {
     background-color: transparent;
     border-top: none;
     border-left: none;

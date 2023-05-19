@@ -2,17 +2,20 @@ import { createElement, insertElement } from "../utils.js"
 
 export class Table {
     constructor() {
+        /** @type {Element} */
+        this.content_code = document.querySelector('div.tb-content')
+
         this.tb_header_el = document.querySelector('.tb-cabecalho')
 
         this.tb_body_el = document.querySelector('.tb-corpo')
 
+        /**@type {Array} */
         this.ribbonAlphabet = []
-        this.oldRibbonAlphabet = []
 
         /** ARRAY DE ELEMENTOS DE CABEÇAHO ADICIONADO
          * @type {Element[]}
          */
-        this.el_tb_headers = []
+        this.headers_aux = []
 
         this.totLineRender = 0
 
@@ -47,8 +50,74 @@ export class Table {
             this.addHeader()
             this.addBody()
             this.is_init = true
+        }
 
-            this.oldRibbonAlphabet = [...this.ribbonAlphabet]
+        this.observer()
+    }
+
+    updateRibbonRemoved() {
+        const el_tr = this.tb_header_el.querySelector('tr')
+        const headers = Array.from(this.tb_header_el.querySelectorAll("th[scope]"));
+        const base = this
+       
+        const els_removed = 
+            headers.map(el => el.getAttribute('scope'))
+                .filter(attr => !base.ribbonAlphabet.some(ribbon => attr == ribbon))
+        
+        // Removendo o alfabeto que não se encontra mais no header
+        for(let th of headers) {
+            const scope = th.getAttribute('scope')
+            const is_removed = els_removed.some(el_rem => el_rem == scope)
+
+            if(is_removed) {
+                el_tr.removeChild(th)
+            }
+        }
+
+        // Removendo o alfabeto que não se encontra mais no body
+        for(let tr of this.tb_body_el.querySelectorAll('tr')) {
+            for(let td_scope of tr.querySelectorAll('td[scope]')) {
+                const is_removed = els_removed.some(el_rem => el_rem == td_scope.getAttribute('scope'))
+
+                if(is_removed) {
+                    tr.removeChild(td_scope)
+                }
+            }
+        }
+    }
+
+    updateRibbonAdded() {
+        /**@type {Element} */
+        const tr = this.tb_header_el.querySelector('tr')
+        
+        // Adicionando os novos alfabeto de fitas no header
+        for(let pos = 0; pos < this.ribbonAlphabet.length; pos++) {
+            const headers_th = this.tb_header_el.querySelectorAll('th[scope]')
+            const alphabet =  this.ribbonAlphabet[pos]
+            const scope = headers_th[pos]?.getAttribute('scope')
+
+            if(scope != alphabet) {
+                const th = createElement('th', alphabet, this.addDataInformationElement(alphabet, false))
+                tr.insertBefore(th, headers_th[pos])
+            }   
+        }
+
+        // Adicionando os novos alfabeti de fita no body
+        for(let pos = 0; pos < this.ribbonAlphabet.length; pos++) {
+            const trs = this.tb_body_el.querySelectorAll('tr')
+
+            for(let tr of trs) {
+                const tds_scope = tr.querySelectorAll('td[scope]')
+                const alphabet =  this.ribbonAlphabet[pos]
+                const scope = tds_scope[pos]?.getAttribute('scope')
+
+                if(scope != alphabet) {
+                    const td = createElement('td', null, this.addDataInformationElement(alphabet, true))
+                    tr.insertBefore(td, tds_scope[pos])
+
+                    this.addEventCreateNewLine(td, tr)
+                }
+            }
         }
     }
     
@@ -56,49 +125,12 @@ export class Table {
      * Fica monitorando se houve alguma mudança na tabela
      */
     observer() {
-        const ribbonAlphabetDeleted = this.oldRibbonAlphabet.filter(x => this.ribbonAlphabet.indexOf(x.trim()) == -1)
-        const ribbonAlphabetAdd = this.ribbonAlphabet.some(x => this.oldRibbonAlphabet.indexOf(x.trim()) == -1)
-        
-        const isChanged = ribbonAlphabetDeleted.length > 0 || ribbonAlphabetAdd
+       
+       this.content_code.style.display = this.ribbonAlphabet.length == 0 ? 'none' : 'block'
 
-        if(isChanged) {
-            this.addHeader()
-
-            const trows = this.tb_body_el.querySelectorAll("tr")
-            console.log(ribbonAlphabetDeleted)
-            for(let trow of trows) {
-
-                // Verificar as colunas que foram removidas
-                for(let scope of ribbonAlphabetDeleted) {
-                    const td_deleted = trow.querySelector(`.scope-${scope.trim()}`)
-                    trow.removeChild(td_deleted)
-                }
-
-                // Verificando as colunas que foram adicionadas
-                const tds = trow.querySelectorAll('[ribbon-alphabet]')
-                for(let i = 0; i < this.ribbonAlphabet.length; i++) {
-                    const sameScoped = tds[i]?.classList.contains(`scope-${this.ribbonAlphabet[i]}`)
-
-                    if(!sameScoped) {
-                        const newTd = createElement('td', null, {
-                            class: `scope-${this.ribbonAlphabet[i]}`,
-                            "ribbon-alphabet": "",
-                            contenteditable: true
-                        })
-
-                        
-                        if(i == this.ribbonAlphabet.length - 1) {
-                            newTd.addEventListener("keypress", e => this.callKeyDown(e, trow))
-                        } else {
-                            if(tds[i].has)
-                            tds[i].removeEventListener("keydown", this.callKeyDown)
-                            
-                        }
-                        insertElement(trow, newTd, tds[i])
-                    }
-                }
-            }
-        }
+       this.updateTotColumn();
+       this.updateRibbonRemoved()
+       this.updateRibbonAdded()
     }
 
     /**
@@ -125,12 +157,12 @@ export class Table {
     createHeaderData() {
         this.tr = createElement('tr')
 
-        this.el_tb_headers = [
+        this.headers_aux = [
             createElement("th", null, {
-                class: "cmd-line cl-code"
+                class: "number-line cl-code"
             }),
 
-            createElement("th", "Q/Sig", {
+            createElement("th", "Q / Σ", {
                 class: "label-table"
             })
         ]
@@ -138,7 +170,7 @@ export class Table {
         this.addRibbonAlphabet()
 
         // Inserindo os alfabeto de fita
-        for(let el of this.el_tb_headers) {
+        for(let el of this.headers_aux) {
             insertElement(this.tr, el)
         }
 
@@ -152,12 +184,23 @@ export class Table {
      */
     addRibbonAlphabet() {
         for(let alphabet of this.ribbonAlphabet) {
-            this.el_tb_headers.push(
-                createElement("th", alphabet.trim(), {
-                    class: `ribbon-alphabet scope-${alphabet}`
-                })
+            this.headers_aux.push(
+                createElement("th", alphabet.trim(), this.addDataInformationElement(alphabet))
             )
         }
+    }
+
+    addDataInformationElement(alphabet, edditabled = false) {
+        const data_dom = {
+            class: `ribbon-alphabet`,
+            scope: alphabet
+        }
+
+        if(edditabled) {
+            data_dom.contenteditable = true
+        }
+
+        return data_dom
     }
 
     /**
@@ -196,7 +239,7 @@ export class Table {
 
             // Adicionar o scopes, deve sempre retirar -2 devido as primeira colunas extras iniciais
             if(i > 1) {
-                td.setAttribute("class", `scope-${this.ribbonAlphabet[i-2]}`)
+                td.setAttribute('scope', this.ribbonAlphabet[i-2])
                 td.setAttribute("ribbon-alphabet", "")
             }
 

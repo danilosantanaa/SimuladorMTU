@@ -2,6 +2,7 @@
 // import { Parser } from "./compiler/Parser.js";
 // import { SymbolTable } from "./compiler/SymbolTable.js";
 
+import { Nontuple } from "./codeEditor/Nontuple.js";
 import { Table } from "./codeEditor/Table.js";
 
 // const symbolTable = new SymbolTable()
@@ -63,14 +64,16 @@ import { Table } from "./codeEditor/Table.js";
 	
 // }, true)
 
-const table = new Table()
+// const table = new Table()
 
 
 
-const inputAF = document.querySelector("#alfabeto-fita")
+// const inputAF = document.querySelector("#alfabeto-fita")
 
-inputAF.addEventListener("focusout", e => {
-    table.ribbonAlphabet = inputAF.innerText.trim().length > 0 ? inputAF.innerText.split(',') : []
-    table.init()
-    table.observer()
-}, false)
+// inputAF.addEventListener("focusout", e => {
+//     table.ribbonAlphabet = inputAF.innerText.trim().length > 0 ? inputAF.innerText.split(',') : []
+//     table.init()
+//     table.observer()
+// }, false)
+
+const nontupla = new Nontuple()

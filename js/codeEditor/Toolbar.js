@@ -3,11 +3,13 @@ import { Nontuple } from "./Nontuple.js"
 import { Parser } from "../compiler/Parser.js"
 import { FileManager } from "../filemanager/FileManager.js"
 import { Lexer } from "../compiler/Lexer.js"
+import { VirtualMachine } from "../virtualmachine/VirtualMachine.js"
 
 export class Toolbar {
     constructor() {
         this.nontuple = new Nontuple()
         this.fileManager = new FileManager()
+        this.runtime = new RunTime()
 
         this.btn_open_el = document.querySelector('.btn.abrir')
         this.btn_save_el = document.querySelector('.btn.salvar')
@@ -23,22 +25,34 @@ export class Toolbar {
         this.onClickSave()
 
         this.source = ""
+
+        this.json_teste = `
+        {"stateBegin":"q1","stateEnd":"q3","commands":[{"state":"q1","instructions":[{"state_next":"q1","alphabet_expected":">","alphabet_replace":">","move":"R"},{"state_next":"q1","alphabet_expected":"1","alphabet_replace":"1","move":"R"},{"state_next":"q2","alphabet_expected":"b","alphabet_replace":"1","move":"L"}]},{"state":"q2","instructions":[{"state_next":"q2","alphabet_expected":"1","alphabet_replace":"1","move":"L"},{"state_next":"q3","alphabet_expected":">","alphabet_replace":">","move":"P"}]}]}
+        `
     }
 
     onClickExecute() {
         const base = this
-        this.btn_execute_el.addEventListener("click", () => {
-           const source = base.getSourceComplete()
 
-            const symbol_table = new SymbolTable()
-            const lexer = new Lexer(source, symbol_table)
-            lexer.tokenize()
+        
+        this.btn_execute_el.addEventListener("click", async () => {
+            base.btn_execute_el.disabled = true
+            const virtual_machine = new VirtualMachine(base.json_teste, base.runtime)
+        //    const source = base.getSourceComplete()
 
-            const parse = new Parser(lexer, symbol_table)
-            parse.parser()
+        //     const symbol_table = new SymbolTable()
+        //     const lexer = new Lexer(source, symbol_table)
+        //     lexer.tokenize()
 
-            console.log('------------')
-            console.log(base.getSourceComplete())
+        //     const parse = new Parser(lexer, symbol_table)
+        //     parse.parser()
+
+        //     console.log('------------')
+        //     console.log(base.getSourceComplete())
+
+            await virtual_machine.run()
+
+            base.btn_execute_el.disabled = false
         })
     }
 

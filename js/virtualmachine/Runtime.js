@@ -9,15 +9,19 @@ class RunTime {
 
         this.cells = []
         this.position = 0;
+
+        this.is_stop = false
+
+        this.time_update = 5
     }
 
     init() {
         this.fita.classList.add("execute")
         this.pointer.classList.add('cabecote')
-        this.loadCells()
+        this.updateCeils()
     }
 
-    loadCells() {
+    updateCeils() {
         this.cells = document.querySelectorAll(".fitas div.cedula")
     }
 
@@ -25,30 +29,66 @@ class RunTime {
         this.display.innerHTML = `${strings.trim()}`
     }
 
+    put(character) {
+        this.cells[this.position].innerHTML = character.replace('>', '►').replace('b', 'Б')
+    }
+
     read() {
         if(this.isEmpty()) return undefined
 
         const el = this.cells[this.position]
-        return el?.innerText ?? undefined
+        const text = el?.innerText.replace('►', '>').replace('Б', 'b') ?? ""
+
+        return text
     }
 
-    right() {
+    async right() {
         const destination = this.cells[this.position+1]
 
         if(destination == undefined) throw 'Overflow'
 
-        this.setDestination(destination)
+        await this.setDestination(destination)
         this.position++
+
+        this.cells[this.position].style.background = '#732002'
+        this.cells[this.position-1].style.background = '#D99D55'
+
+        await this.sleep(this.time_update * 10)
     }
 
-    left() {
+    async left() {
         const destination = this.cells[this.position-1]
 
         if(destination == undefined) throw 'Underflow'
 
-        this.setDestination(destination, true)
+        await this.setDestination(destination, true)
         this.position--
 
+        this.cells[this.position].style.background = '#732002'
+        this.cells[this.position+1].style.background = '#D99D55'
+
+        await this.sleep(this.time_update * 10)
+    }
+
+    async stop() {
+        this.fita.classList.remove("execute")
+        this.pointer.classList.remove('cabecote')
+        this.cells[this.position].style.background = '#D99D55'
+        this.cells = []
+        await this.sleep(this.time_update * 10)
+    }
+
+    accept() {
+        console.log('[Accept...]')
+    }
+
+    reject() {
+        console.log('[Reject...]')
+    }
+
+    stopeRuntime() {
+        this.stop()
+        console.log('[Runtime interrompido...]')
     }
 
     isHalfRibbon(el_destination) {
@@ -57,30 +97,30 @@ class RunTime {
         return el_destination.offsetLeft < half_ribbon
     }
 
-    setDestination(el_destination, is_left = false) {
+    async setDestination(el_destination, is_left = false) {
         
         if(is_left) {
             if(this.isHalfRibbon(el_destination)) {
                 this.fita.scrollLeft = 0
-                this.animationToLeft(el_destination.offsetLeft, this.pointer.offsetLeft).then()
+                await this.animationToLeft(el_destination.offsetLeft, this.pointer.offsetLeft)
             } else {
-                this.animationToLeft(this.fita.scrollLeft - el_destination.offsetWidth, this.fita.scrollLeft, true).then()
+                await this.animationToLeft(this.fita.scrollLeft - el_destination.offsetWidth, this.fita.scrollLeft, true)
             }
         }
 
         else {
             if(this.isHalfRibbon(el_destination)) {
                 this.fita.scrollLeft = 0
-                this.animationToRight(this.pointer.offsetLeft, el_destination.offsetLeft).then()
+                await this.animationToRight(this.pointer.offsetLeft, el_destination.offsetLeft)
             } else {
-                this.animationToRight(this.fita.scrollLeft, this.fita.scrollLeft + el_destination.offsetWidth, true).then()
+                await this.animationToRight(this.fita.scrollLeft, this.fita.scrollLeft + el_destination.offsetWidth, true)
             }
         }
     }
 
     async animationToRight(pos_begin, pos_end, scroll = false) {
         for(let pos = pos_begin; pos <= pos_end; pos++) {
-            await this.sleep()
+            await this.sleep(this.time_update)
 
             if(!scroll) {
                 this.pointer.style.left = `${pos}px`
@@ -92,7 +132,7 @@ class RunTime {
 
     async animationToLeft(pos_begin, pos_end, scroll = false) {
         for(let pos = pos_end; pos >= pos_begin; pos--) {
-            await this.sleep()
+            await this.sleep(this.time_update)
             
             if(!scroll) {
                 this.pointer.style.left = `${pos}px`
@@ -102,11 +142,11 @@ class RunTime {
         }
     }
 
-    async sleep() {
+    async sleep(time) {
         return new Promise(resolve => setTimeout(() => { 
             console.log('wait...')
             resolve()
-        }, 0.001))
+        }, time | 1 ))
     }
 
     isEmpty() {
@@ -114,4 +154,9 @@ class RunTime {
     }
 }
 
-const run = new RunTime()
+function run(command) {
+    console.log(command)
+    eval(command)
+}
+
+globalThis.runtime = new RunTime();

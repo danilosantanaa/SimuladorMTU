@@ -9,7 +9,7 @@ export class CodeGeneration {
         /**
          * Últimos comandos
          */
-        this.lastCommands = []
+        this.headers = []
     }
 
     /**
@@ -19,7 +19,7 @@ export class CodeGeneration {
         if(!last) {
             this.commands.push(state)
         } else {
-            this.lastCommands.push(state)
+            this.headers.push(state)
         }
     }
 
@@ -27,18 +27,20 @@ export class CodeGeneration {
      * Geração de código final
      */
     generationFinalCode() {
-        let cmd_final = ''
+        let json = "{"
 
-        this.commands.forEach(cmd => {
-            cmd_final += cmd.convert()
-        });
+        // Gerando as chamada iniciais: estado inicial e final
+        json += this.headers.map(x => `${x.convert()},`).join("")
 
-        while(this.lastCommands.length > 0) {
-            const cmd = this.lastCommands.pop()
-            cmd_final += cmd?.convert()
-        }
+        // Gerando as instruções
+        json += `"commands": [`
+        json += this.commands.map(x => x.convert()).join(',')
+        json += ']'
+        // fim da geração de instruções
 
-        return cmd_final.replace(/[\t\n]/g, "").replace(/\s\s/g, "")
+        json += '}'
+
+        return json
     }
 }
 
@@ -62,32 +64,43 @@ export class StateMain {
     }
 
     convert() {
-        let cmds = `function ${this.label}(){`
-
-        cmds += "if(is_stop) {stopRuntime();return;} let _input_ribbon  =  read();"
+        let cmds = `{ "state": "${this.label}",`
         
-        for(let pos = 0; pos < this.body.length; pos++) {
-            if (pos == 0) {
-                cmds += "if"
-            } else {
-                cmds += "else if"
+        cmds += `"instructions": [`
+        cmds += this.body.map(x => {
+            return ` {
+                "state_next": "${x.state}",
+                "alphabet_expected": "${x.alphabet_expected}",
+                "alphabet_replace": "${x.alphabet_replace}",
+                "move": "${x.getMoveComand()}"
             }
-
-            cmds += `(_input_ribbon  ==  '${this.body[pos].alphabetParams}')
-                {
-                    write('${this.body[pos].state}');
-                    ${this.body[pos].state}();
-                    ${this.body[pos].getMoveComand()}();
-                    put('${this.body[pos].alphabetModifier}');
-                }    
             `
-        }
+        }).join(', ')
 
-        cmds += 'else {reject();}'
 
-        cmds += '}'
+        // for(let pos = 0; pos < this.body.length; pos++) {
 
-        return cmds
+        //     // cmds += `(_input_ribbon  ==  '${this.body[pos].alphabetParams}')
+        //     //     {
+        //     //         write('${this.body[pos].state}');
+        //     //         ${this.body[pos].state}();
+        //     //         ${this.body[pos].getMoveComand()}();
+        //     //         put('${this.body[pos].alphabetModifier}');
+        //     //     }    
+        //     // `
+
+        //     cmds += `
+        //         {"state_next": "${this.body[pos].state}",
+        //         "alphabet_expected": "",
+        //         "alphabet_replace": "${this.body[pos].alphabet_expected}",
+        //         "move": "${this.body[pos].getMoveComand()}"
+            
+        //     `
+        // }
+
+        cmds += ']}'
+
+        return JSON.stringify(JSON.parse(cmds))
     }
 }
 
@@ -97,7 +110,7 @@ export class StateBegin {
     }
 
     convert() {
-       return `${this.label}();`
+       return `"stateBegin": "${this.label}"`
     }
 }
 
@@ -107,15 +120,15 @@ export class StateEnd {
     }
 
     convert() {
-        return `function ${this.label}() {accept();}`
+        return `"stateEnd": "${this.label}"`
     }
 }
 
 export class Instruction {
     constructor() {
         this.state = null
-        this.alphabetParams = null
-        this.alphabetModifier = null
+        this.alphabet_expected = null
+        this.alphabet_replace = null
 
         /**
          * @private
@@ -124,15 +137,15 @@ export class Instruction {
     }
 
     setRightCommand() {
-        this.__move = 'right'
+        this.__move = 'R'
     } 
 
     setLeftCommand() {
-        this.__move = 'left'
+        this.__move = 'L'
     }
 
     setStopCommand() {
-        this.__move = 'stop'
+        this.__move = 'P'
     }
 
     getMoveComand() {

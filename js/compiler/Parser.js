@@ -65,10 +65,12 @@ export class Parser {
             this.__program()
             console.log('code generation')
             console.log('------------------------')
-            console.log(this.codeGeneration.generationFinalCode())
             this.parserAnalyze.updateScopes()
             this.parserAnalyze.catchAllErro()
+
         }
+        
+        return this.codeGeneration.generationFinalCode()
     }
 
     nextLine() {
@@ -369,14 +371,14 @@ export class Parser {
 
             this.__alphabet()
             this.parserAnalyze.command.alphabetOld = this.__lastCaughtToken()
-            this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+            this.instruction.alphabet_expected = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
             this.parserAnalyze.command.alphabetNew = this.__lastCaughtToken()
-            this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+            this.instruction.alphabet_replace = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__mover()
@@ -426,14 +428,14 @@ export class Parser {
 
             this.__alphabet()
             this.parserAnalyze.command.alphabetOld = this.__lastCaughtToken()
-            this.instruction.alphabetParams = this.__getAttribute(this.__lastCaughtToken())
+            this.instruction.alphabet_expected = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__modifier()
 
             this.__alphabet()
             this.parserAnalyze.command.alphabetNew = this.__lastCaughtToken()
-            this.instruction.alphabetModifier = this.__getAttribute(this.__lastCaughtToken())
+            this.instruction.alphabet_replace = this.__getAttribute(this.__lastCaughtToken())
             this.assignScope()
 
             this.__mover()

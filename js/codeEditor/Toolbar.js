@@ -37,19 +37,22 @@ export class Toolbar {
         
         this.btn_execute_el.addEventListener("click", async () => {
             base.btn_execute_el.disabled = true
-            const virtual_machine = new VirtualMachine(base.json_teste, base.runtime)
-        //    const source = base.getSourceComplete()
-
-        //     const symbol_table = new SymbolTable()
-        //     const lexer = new Lexer(source, symbol_table)
-        //     lexer.tokenize()
-
-        //     const parse = new Parser(lexer, symbol_table)
-        //     parse.parser()
-
-        //     console.log('------------')
-        //     console.log(base.getSourceComplete())
-
+            const source = base.getSourceComplete()
+            
+            const symbol_table = new SymbolTable()
+            const lexer = new Lexer(source, symbol_table)
+            lexer.tokenize()
+            
+            const parse = new Parser(lexer, symbol_table)
+            const json_code = parse.parser()
+            
+            console.log('--- CODIGO FONTE ---')
+            console.log(base.getSourceComplete())
+            
+            console.log('--- CODIGO GERADO ---')
+            console.log(json_code)
+            
+            const virtual_machine = new VirtualMachine(json_code, base.runtime)
             await virtual_machine.run()
 
             base.btn_execute_el.disabled = false

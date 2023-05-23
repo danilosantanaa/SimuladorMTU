@@ -76,28 +76,6 @@ export class StateMain {
             }
             `
         }).join(', ')
-
-
-        // for(let pos = 0; pos < this.body.length; pos++) {
-
-        //     // cmds += `(_input_ribbon  ==  '${this.body[pos].alphabetParams}')
-        //     //     {
-        //     //         write('${this.body[pos].state}');
-        //     //         ${this.body[pos].state}();
-        //     //         ${this.body[pos].getMoveComand()}();
-        //     //         put('${this.body[pos].alphabetModifier}');
-        //     //     }    
-        //     // `
-
-        //     cmds += `
-        //         {"state_next": "${this.body[pos].state}",
-        //         "alphabet_expected": "",
-        //         "alphabet_replace": "${this.body[pos].alphabet_expected}",
-        //         "move": "${this.body[pos].getMoveComand()}"
-            
-        //     `
-        // }
-
         cmds += ']}'
 
         return JSON.stringify(JSON.parse(cmds))

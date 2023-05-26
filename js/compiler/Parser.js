@@ -2,7 +2,7 @@ import { Lexer } from "./Lexer.js"
 import { ErrorParser } from "../erros/ErrorParser.js"
 import { SymbolTable, TokenStruct, SCOPE } from "./SymbolTable.js"
 import { TOKENIDENTIFIERS } from "./TokenIdentifiers.js"
-import { CodeGeneration, Instruction, StateMain, StateBegin, StateEnd} from "./CodeGeneration.js"
+import { CodeGeneration, Instruction, StateMain, StateBegin, StateEnd, SetState, Alphabet, StateNoFinal, RibbonAlphabet, Delimiter, TangeBlank} from "./CodeGeneration.js"
 import { ParserAnalyze } from "./ParserAnalyze.js"
 
 export class Parser {
@@ -54,6 +54,12 @@ export class Parser {
          */
         this.codeGeneration = new CodeGeneration()
         this.stateMain = null
+        this.setsState = null
+        this.alphabet = null
+        this.stateNoFinal = null
+        this.ribbonAlphabet = null
+        this.delimiter = null
+        this.tangeBlank = null
         this.instruction = null
     }
 
@@ -97,7 +103,12 @@ export class Parser {
             this.__recognize(tokenStruct)
 
             this.__assigment()
+
+            this.setsState = new SetState()
             this.__exprStates()
+
+            this.codeGeneration.add(this.setsState, true)
+
             this.__endLine()
                 
             
@@ -121,7 +132,11 @@ export class Parser {
             this.scopeID = SCOPE.A
             this.__recognize(tokenStruct)
             this.__assigment()
+
+            this.alphabet = new Alphabet()
             this.__exprAlphabet()
+            this.codeGeneration.add(this.alphabet, true)
+
             this.__endLine()
 
         } catch(e) {
@@ -196,7 +211,10 @@ export class Parser {
             this.scopeID = SCOPE.NF
             this.__recognize(tokenStruct)
             this.__assigment()
+
+            this.stateNoFinal = new StateNoFinal()
             this.__exprStates()
+            this.codeGeneration.add(this.stateNoFinal, true)
             this.__endLine()
         
         } catch(e) {
@@ -220,13 +238,18 @@ export class Parser {
             this.scopeID = SCOPE.AF
             this.__recognize(tokenStruct)
             this.__assigment()
+
+            this.ribbonAlphabet = new RibbonAlphabet()
             this.__alphabet()
             this.__comma()
+
             this.exprRibbonAlphabet()
+
             this.__dValueConst()
             this.__comma()
             this.__bValueConst()
 
+            this.codeGeneration.add(this.ribbonAlphabet, true)
             this.__endLine()
           
         } catch(e) {
@@ -250,7 +273,11 @@ export class Parser {
             this.scopeID = SCOPE.D
             this.__recognize(tokenStruct)
             this.__assigment()
+
+            this.delimiter = new Delimiter()
             this.__dValueConst()
+
+            this.codeGeneration.add(this.delimiter, true)
             this.__endLine()
        
         } catch(e) {
@@ -270,6 +297,16 @@ export class Parser {
         this.__recognize(tokenStruct)
         this.assignScope()
 
+        // Caso esteja no escopo do alfabeto de fita
+        if(this.scopeID == SCOPE.AF) {
+            this.ribbonAlphabet.add(this.__getAttribute(this.__lastCaughtToken()))
+        }
+
+        // Caso esteja no escopo do delimitador
+        if(this.scopeID == SCOPE.D) {
+            this.delimiter.add(this.__getAttribute(this.__lastCaughtToken()))
+        }
+
         this.__endLine()
     }
 
@@ -287,7 +324,11 @@ export class Parser {
             this.scopeID = SCOPE.B
             this.__recognize(tokenStruct)
             this.__assigment()
+
+            this.tangeBlank = new TangeBlank()
             this.__bValueConst()
+
+            this.codeGeneration.add(this.tangeBlank, true)
             this.__endLine()
         } catch(e) {
             console.error(e)
@@ -305,6 +346,16 @@ export class Parser {
         
             this.__recognize(tokenStruct)
             this.assignScope()
+
+            // Caso esteja no escopo do alfabeto de fita
+            if(this.scopeID == SCOPE.AF) {
+                this.ribbonAlphabet.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
+
+            // Caso esteja no escopo do branco de fita
+            if(this.scopeID == SCOPE.B) {
+                this.tangeBlank.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
     }
 
     /**
@@ -482,6 +533,17 @@ export class Parser {
         this.__states()
         this.assignScope()
 
+        // Caso seja o escope de conjunto de estado
+        if(this.scopeID == SCOPE.E) {
+           
+            this.setsState.add(this.__getAttribute(this.__lastCaughtToken()))
+        }
+
+        // Caso seja o escopo do conjunto de estado não final
+        if(this.scopeID == SCOPE.NF) {
+            this.stateNoFinal.add(this.__getAttribute(this.__lastCaughtToken()))
+        }
+
         this.__subExprStates()
     }
 
@@ -496,6 +558,16 @@ export class Parser {
 
             this.__states()
             this.assignScope()
+
+            // Caso seja o escope de conjunto de estado
+            if(this.scopeID == SCOPE.E) {
+                this.setsState.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
+
+            // Caso seja o escopo do conjunto de estado não final
+            if(this.scopeID == SCOPE.NF) {
+                this.stateNoFinal.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
 
             this.__subExprStates()
         }
@@ -570,6 +642,17 @@ export class Parser {
         ) {
             this.__recognize(tokenStruct)
             this.assignScope()
+
+            // Se o escope for alfabeto
+            if(this.scopeID == SCOPE.A) {
+                this.alphabet.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
+
+            // Se o escopo for alfabeto de fita
+            if(this.scopeID == SCOPE.AF) {
+                this.ribbonAlphabet.add(this.__getAttribute(this.__lastCaughtToken()))
+            }
+
         } else {
             throw this.__reject('Alfabeto', tokenStruct)
         }

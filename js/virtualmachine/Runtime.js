@@ -13,12 +13,17 @@ class RunTime {
         this.is_stop = false
 
         this.time_update = 5
+
+        this.time_begin = null
+        this.time_finashed = null
     }
 
     init() {
         this.fita.classList.add("execute")
         this.pointer.classList.add('cabecote')
         this.updateCeils()
+
+        this.time_begin = new Date()
     }
 
     updateCeils() {
@@ -26,7 +31,7 @@ class RunTime {
     }
 
     write(strings) {
-        this.display.innerHTML = `${strings.trim()}`
+        this.display.innerHTML = `${strings?.trim()}`
     }
 
     put(character) {
@@ -70,12 +75,24 @@ class RunTime {
         await this.sleep(this.time_update * 10)
     }
 
-    async stop() {
+    async stop(forced = false) {
         this.fita.classList.remove("execute")
         this.pointer.classList.remove('cabecote')
-        this.cells[this.position].style.background = '#D99D55'
-        this.cells = []
+
+        if(this.cells.length > 0) {
+
+            this.cells[this.position].style.background = '#D99D55'
+            this.cells = []
+            this.position = 0
+        }
+
         await this.sleep(this.time_update * 10)
+
+        if(!forced) {
+            console.log('[Finished...]')
+        }
+
+        this.time_finashed = new Date()
     }
 
     accept() {
@@ -87,7 +104,7 @@ class RunTime {
     }
 
     stopeRuntime() {
-        this.stop()
+        this.stop(true)
         console.log('[Runtime interrompido...]')
     }
 
@@ -146,7 +163,7 @@ class RunTime {
         return new Promise(resolve => setTimeout(() => { 
             console.log('wait...')
             resolve()
-        }, time | 1 ))
+        }, time))
     }
 
     isEmpty() {

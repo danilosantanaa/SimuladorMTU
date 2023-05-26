@@ -65,7 +65,19 @@ export class Toolbar {
             await base.fileManager.open()
             await base.fileManager.read()
             base.source = base.fileManager.getContents()
+
+            const symbol_table = new SymbolTable()
+            const lexer = new Lexer(base.source, symbol_table)
+            lexer.tokenize()
+
+            const parser = new Parser(lexer, symbol_table)
+            const json_code = parser.parser()
+
+            console.log('---- CÓDIGO LIDO ----')
             console.log(base.source)
+
+            console.log('---- CÓDIGO GERADO ----')
+            console.log(json_code)
         }, true)
 
     }

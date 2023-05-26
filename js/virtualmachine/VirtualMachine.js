@@ -54,8 +54,9 @@ export class VirtualMachine {
             const command = this.searchIntructions(state_current, input)
 
             if(command == undefined || command == null ) {
-                console.log('Comando quebrado...')
+                this.runtime.stopeRuntime()
                 finashed = true
+                continue
             }
 
             state_current = command.state_next
@@ -69,7 +70,6 @@ export class VirtualMachine {
                 break;
                 case 'P':
                     await this.runtime.stop()
-                    console.log('Finalizado com sucesso!')
                     finashed = true
                     
                 break;
@@ -83,7 +83,7 @@ export class VirtualMachine {
 
     searchIntructions(statePointer, alphabet_reading) {
         const state_pointer = this.commands.filter(x => x.state == statePointer)[0]
-        const instruction = state_pointer.instructions.filter(intruction => intruction.alphabet_expected == alphabet_reading)[0]
+        const instruction = state_pointer?.instructions?.filter(intruction => intruction.alphabet_expected == alphabet_reading)[0]
 
         return instruction
     }

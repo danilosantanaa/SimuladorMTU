@@ -13,13 +13,13 @@ export class CodeGeneration {
     }
 
     /**
-     * @param {StateMain} stateMain
+     * @param {any} stateMain
      */
-    add(state, last = false) {
-        if(!last) {
-            this.commands.push(state)
+    add(sets, is_header = false) {
+        if(!is_header) {
+            this.commands.push(sets)
         } else {
-            this.headers.push(state)
+            this.headers.push(sets)
         }
     }
 
@@ -82,6 +82,34 @@ export class StateMain {
     }
 }
 
+export class SetState {
+    constructor() {
+        this.labels = []
+    }
+
+    add(label) {
+        this.labels.push(`"${label}"`)
+    }
+
+    convert() {
+        return `"stateSets": [${this.labels.join(',')}]`
+    }
+}
+
+export class Alphabet {
+    constructor() {
+        this.labels = []
+    }
+
+    add(label) {
+        this.labels.push(`"${label}"`)
+    }
+
+    convert() {
+        return `"alphabet": [${this.labels.join(',')}]`
+    }
+}
+
 export class StateBegin {
     constructor(label) {
         this.label = label
@@ -99,6 +127,62 @@ export class StateEnd {
 
     convert() {
         return `"stateEnd": "${this.label}"`
+    }
+}
+
+export class StateNoFinal {
+    constructor() {
+        this.labels = []
+    }
+
+    add(label) {
+        this.labels.push(`"${label}"`)
+    }
+
+    convert() {
+        return `"stateNoFinal": [${this.labels.join(',')}]`
+    }
+}
+
+export class RibbonAlphabet {
+    constructor() {
+        this.labels = []
+    }
+
+    add(label) {
+        this.labels.push(`"${label}"`)
+    }
+
+    convert() {
+        return `"ribbonAlphabet": [${this.labels.join(',')}]`
+    }
+}
+
+export class Delimiter {
+    constructor() {
+        this.label = ""
+    }
+
+    add(label) {
+        this.label = label
+    }
+
+    convert() {
+        return `"delimiter":"${this.label}"`
+    }
+}
+
+export class TangeBlank {
+    constructor() {
+        this.label = ""
+    }
+
+    add(label) {
+        this.label = label
+    }
+
+    convert() {
+        return `"tangeBlank":"${this.label}"`
     }
 }
 
